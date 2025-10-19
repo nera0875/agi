@@ -5,6 +5,7 @@ import {
   Plus,
   RefreshCw,
   Search,
+  HardDrive,
 } from "lucide-react";
 import {
   Card,
@@ -25,6 +26,7 @@ import {
   SearchResult,
 } from "../lib/graphql-hooks";
 import { Neo4jSection } from "./neo4j-section";
+import { DatabaseViewer } from "./database-viewer";
 import { toast } from "sonner";
 
 export function BrainSection() {
@@ -179,7 +181,7 @@ export function BrainSection() {
       </div>
 
       <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="memory">
             <Database className="h-4 w-4 mr-2" />
             Memory
@@ -187,6 +189,10 @@ export function BrainSection() {
           <TabsTrigger value="graph">
             <Link className="h-4 w-4 mr-2" />
             Graph
+          </TabsTrigger>
+          <TabsTrigger value="databases">
+            <HardDrive className="h-4 w-4 mr-2" />
+            Databases
           </TabsTrigger>
         </TabsList>
 
@@ -270,6 +276,10 @@ export function BrainSection() {
 
         <TabsContent value="graph">
           <Neo4jSection />
+        </TabsContent>
+
+        <TabsContent value="databases">
+          <DatabaseViewer />
         </TabsContent>
       </Tabs>
     </div>
