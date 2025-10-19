@@ -1,0 +1,130 @@
+// À ajouter dans graphql-hooks.ts pour les queries graph
+
+import { gql } from "@apollo/client";
+
+// Types GraphQL pour le graphe
+export interface GraphNode {
+  id: string;
+  label: string;
+  type: string; // Memory, Knowledge, Task
+  properties: Record<string, any>;
+}
+
+export interface GraphRelation {
+  id: string;
+  source: string;
+  target: string;
+  type: string;
+  weight: number;
+}
+
+export interface GraphData {
+  nodes: GraphNode[];
+  relations: GraphRelation[];
+}
+
+// Query pour récupérer les données du graphe
+export const GET_GRAPH_DATA_QUERY = gql`
+  query GetGraphData($nodeTypes: [String!], $limit: Int) {
+    getGraphData(nodeTypes: $nodeTypes, limit: $limit) {
+      nodes {
+        id
+        label
+        type
+        properties
+      }
+      relations {
+        id
+        source
+        target
+        type
+        weight
+      }
+    }
+  }
+`;
+
+// Query pour rechercher des nœuds
+export const SEARCH_GRAPH_NODES_QUERY = gql`
+  query SearchGraphNodes($query: String!, $limit: Int) {
+    searchGraphNodes(query: $query, limit: $limit) {
+      id
+      label
+      type
+      properties
+    }
+  }
+`;
+
+// Query pour récupérer les voisins d'un nœud
+export const GET_NODE_NEIGHBORS_QUERY = gql`
+  query GetNodeNeighbors($nodeId: String!, $depth: Int) {
+    getNodeNeighbors(nodeId: $nodeId, depth: $depth) {
+      nodes {
+        id
+        label
+        type
+        properties
+      }
+      relations {
+        id
+        source
+        target
+        type
+        weight
+      }
+    }
+  }
+`;
+
+// Hook pour récupérer les données du graphe
+export const useGraphData = (
+  options?: { nodeTypes?: string[]; limit?: number; skip?: boolean }
+) => {
+  const { data, loading, error, refetch } = useQuery(GET_GRAPH_DATA_QUERY, {
+    variables: {
+      nodeTypes: options?.nodeTypes,
+      limit: options?.limit || 100,
+    },
+    skip: options?.skip,
+    fetchPolicy: "cache-and-network",
+    errorPolicy: "all",
+  });
+
+  return {
+    data: data?.getGraphData as GraphData | undefined,
+    loading,
+    error,
+    refetch,
+  };
+};
+
+// Hook pour rechercher des nœuds
+export const useSearchGraphNodes = (query: string, limit: number = 10) => {
+  const { data, loading, error } = useQuery(SEARCH_GRAPH_NODES_QUERY, {
+    variables: { query, limit },
+    skip: !query,
+    fetchPolicy: "cache-and-network",
+  });
+
+  return {
+    data: (data?.searchGraphNodes as GraphNode[]) || [],
+    loading,
+    error,
+  };
+};
+
+// Hook pour récupérer les voisins
+export const useNodeNeighbors = (nodeId: string, depth: number = 1) => {
+  const { data, loading, error } = useQuery(GET_NODE_NEIGHBORS_QUERY, {
+    variables: { nodeId, depth },
+    skip: !nodeId,
+    fetchPolicy: "cache-and-network",
+  });
+
+  return {
+    data: data?.getNodeNeighbors as GraphData | undefined,
+    loading,
+    error,
+  };
+};

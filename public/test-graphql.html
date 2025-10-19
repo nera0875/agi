@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head><title>GraphQL Test</title></head>
+<body>
+  <h1>GraphQL Connection Test</h1>
+  <button onclick="testGraphQL()">Test GraphQL</button>
+  <pre id="result"></pre>
+
+  <script>
+    async function testGraphQL() {
+      try {
+        const response = await fetch('http://localhost:8000/graphql', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            query: '{ healthCheck { service status message } }'
+          })
+        });
+
+        const data = await response.json();
+        document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+
+        if (data.errors) {
+          console.error('GraphQL Errors:', data.errors);
+        } else {
+          console.log('✅ GraphQL working!', data);
+        }
+      } catch (error) {
+        document.getElementById('result').textContent = 'ERROR: ' + error.message;
+        console.error('❌ Connection failed:', error);
+      }
+    }
+  </script>
+</body>
+</html>
