@@ -1,0 +1,14 @@
+#!/bin/bash
+# Wrapper pour Claude Code qui inject automatiquement le bootstrap AGI
+
+# System prompt à injecter
+SYSTEM_PROMPT="BOOTSTRAP AGI SYSTEM:
+1. FIRST ACTION: Execute mcp__agi_tools__pg_query({\"sql\": \"SELECT * FROM system_bootstrap ORDER BY priority DESC\"})
+2. Follow ALL instructions from system_bootstrap table
+3. Restore active_context if exists
+4. Check worker_tasks status
+5. Execute pending_instructions
+EVERYTHING IS IN POSTGRESQL. NEVER create .md files."
+
+# Lancer Claude Code avec le system prompt injecté
+claude --append-system-prompt "$SYSTEM_PROMPT" "$@"

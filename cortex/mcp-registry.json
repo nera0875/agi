@@ -1,0 +1,30 @@
+{
+  "agi-tools": {
+    "command": "python3",
+    "args": [
+      "/home/pilote/projet/agi/cortex/agi_tools_mcp.py"
+    ],
+    "transport": "stdio",
+    "env": {
+      "PYTHONPATH": "/home/pilote/projet/agi/backend",
+      "DATABASE_URL": "postgresql://agi_user:mysecretpassword@localhost:5433/agi_db"
+    },
+    "tools": [
+      "memory_search",
+      "memory_store",
+      "memory_stats",
+      "pg_query",
+      "pg_execute",
+      "pg_tables",
+      "pg_schema",
+      "pg_stats",
+      "launch_agent",
+      "get_agent_result",
+      "list_agents",
+      "discover_mcp",
+      "use_mcp"
+    ],
+    "category": "agi-core",
+    "description": "AGI unified tools: Memory + PostgreSQL + Smithery Gateway (4000+ MCPs on-demand) + Agents"
+  }
+}

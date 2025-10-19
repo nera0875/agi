@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AGI System - Management Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+        }
+
+        .card h2 {
+            color: #333;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .icon {
+            width: 24px;
+            height: 24px;
+        }
+
+        .endpoints {
+            list-style: none;
+        }
+
+        .endpoints li {
+            padding: 10px;
+            margin-bottom: 10px;
+            background: #f5f5f5;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .endpoints li:hover {
+            background: #e8e8e8;
+        }
+
+        .method {
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .get { background: #4CAF50; }
+        .post { background: #2196F3; }
+        .ws { background: #FF9800; }
+        .graphql { background: #E10098; }
+
+        .url {
+            color: #333;
+            text-decoration: none;
+            font-family: 'Courier New', monospace;
+            flex: 1;
+            margin: 0 10px;
+        }
+
+        .url:hover {
+            color: #667eea;
+            text-decoration: underline;
+        }
+
+        .status {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #4CAF50;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .quick-actions {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .quick-actions h3 {
+            margin-bottom: 15px;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            background: white;
+            color: #667eea;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+        }
+
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .metric {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .metric-label {
+            font-size: 12px;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 AGI System Management Dashboard</h1>
+
+        <div class="grid">
+            <!-- Main API Endpoints -->
+            <div class="card">
+                <h2>
+                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                    </svg>
+                    Core API Endpoints
+                </h2>
+                <ul class="endpoints">
+                    <li>
+                        <span class="method get">GET</span>
+                        <a href="http://localhost:8000/" class="url" target="_blank">http://localhost:8000/</a>
+                        <span class="status"></span>
+                    </li>
+                    <li>
+                        <span class="method get">GET</span>
+                        <a href="http://localhost:8000/health" class="url" target="_blank">http://localhost:8000/health</a>
+                        <span class="status"></span>
+                    </li>
+                    <li>
+                        <span class="method get">GET</span>
+                        <a href="http://localhost:8000/docs" class="url" target="_blank">http://localhost:8000/docs</a>
+                        <span class="status"></span>
+                    </li>
+                    <li>
+                        <span class="method get">GET</span>
+                        <a href="http://localhost:8000/redoc" class="url" target="_blank">http://localhost:8000/redoc</a>
+                        <span class="status"></span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- GraphQL Endpoints -->
+            <div class="card">
+                <h2>
+                    <svg class="icon" viewBox="0 0 24 24" fill="#E10098">
+                        <path d="M12,1.85c-0.3,0-0.6,0.1-0.8,0.2L2.8,6.9C2.3,7.2,2,7.7,2,8.3v7.5c0,0.6,0.3,1.1,0.8,1.4l8.4,4.9c0.5,0.3,1.1,0.3,1.6,0l8.4-4.9c0.5-0.3,0.8-0.8,0.8-1.4V8.3c0-0.6-0.3-1.1-0.8-1.4l-8.4-4.9C12.6,1.9,12.3,1.85,12,1.85z"/>
+                    </svg>
+                    GraphQL API
+                </h2>
+                <ul class="endpoints">
+                    <li>
+                        <span class="method graphql">GQL</span>
+                        <a href="http://localhost:8000/graphql" class="url" target="_blank">http://localhost:8000/graphql</a>
+                        <span class="status"></span>
+                    </li>
+                    <li>
+                        <span class="method ws">WS</span>
+                        <span class="url">ws://localhost:8000/graphql</span>
+                        <span class="status"></span>
+                    </li>
+                </ul>
+
+                <div class="quick-actions">
+                    <h3>GraphQL Operations</h3>
+                    <ul style="list-style: none; color: white; font-size: 14px;">
+                        <li>• Query: searchMemories, getMemory, getRelatedMemories</li>
+                        <li>• Mutation: createMemory, createRelation, sendMessage, login</li>
+                        <li>• Subscription: chatStream, memoryUpdates, agentThoughts</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Database Management -->
+            <div class="card">
+                <h2>
+                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"></path>
+                    </svg>
+                    Database Management
+                </h2>
+                <ul class="endpoints">
+                    <li>
+                        <span class="method get">PG</span>
+                        <span class="url">postgresql://localhost:5432/agi_db</span>
+                        <span class="status"></span>
+                    </li>
+                    <li>
+                        <span class="method get">REDIS</span>
+                        <a href="http://localhost:8001" class="url" target="_blank">http://localhost:8001</a>
+                        <span class="status"></span>
+                    </li>
+                </ul>
+
+                <div class="metrics">
+                    <div class="metric">
+                        <div class="metric-value">16</div>
+                        <div class="metric-label">PostgreSQL</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value">pgvector</div>
+                        <div class="metric-label">Extension</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value">1024</div>
+                        <div class="metric-label">Dimensions</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value">RRF</div>
+                        <div class="metric-label">Search</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Observability -->
+            <div class="card">
+                <h2>
+                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                    </svg>
+                    Observability & Monitoring
+                </h2>
+                <ul class="endpoints">
+                    <li>
+                        <span class="method get">TRACE</span>
+                        <a href="https://smith.langchain.com" class="url" target="_blank">smith.langchain.com</a>
+                        <span class="status"></span>
+                    </li>
+                    <li>
+                        <span class="method get">ERROR</span>
+                        <a href="https://sentry.io" class="url" target="_blank">sentry.io</a>
+                        <span class="status"></span>
+                    </li>
+                    <li>
+                        <span class="method get">METRICS</span>
+                        <span class="url">/metrics (Prometheus)</span>
+                        <span class="status"></span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Docker Services -->
+            <div class="card">
+                <h2>
+                    <svg class="icon" fill="#0db7ed" viewBox="0 0 24 24">
+                        <path d="M20.9,7.4c-0.2-0.2-0.6-0.3-1.2-0.4c-0.1-0.6-0.4-1.2-0.9-1.7l-0.3-0.2l-0.2,0.3c-0.3,0.4-0.4,1-0.3,1.5c0,0.2,0.1,0.5,0.2,0.7c-0.3,0.2-0.9,0.3-1.6,0.3H1.3L1.2,8.2c-0.1,0.6-0.1,2.4,1.1,3.8c0.9,1.1,2.3,1.6,4.1,1.6c3.9,0,6.8-1.8,8.2-5.1c0.5,0,1.7,0,2.3-1.1c0,0,0.1-0.1,0.2-0.3l0.1-0.1L20.9,7.4z"/>
+                    </svg>
+                    Docker Services
+                </h2>
+                <ul class="endpoints">
+                    <li>
+                        <span class="method post">CMD</span>
+                        <span class="url">docker-compose up -d</span>
+                    </li>
+                    <li>
+                        <span class="method get">LOGS</span>
+                        <span class="url">docker-compose logs -f</span>
+                    </li>
+                    <li>
+                        <span class="method post">STOP</span>
+                        <span class="url">docker-compose down</span>
+                    </li>
+                </ul>
+
+                <div class="metrics">
+                    <div class="metric">
+                        <div class="metric-value">3</div>
+                        <div class="metric-label">Services</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value">3</div>
+                        <div class="metric-label">Volumes</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value">1</div>
+                        <div class="metric-label">Network</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value">Ready</div>
+                        <div class="metric-label">Status</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Commands -->
+            <div class="card">
+                <h2>
+                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
+                    </svg>
+                    Quick Commands
+                </h2>
+
+                <div class="quick-actions">
+                    <h3>Start Everything</h3>
+                    <code style="display: block; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 4px; margin: 10px 0;">
+                        cd /home/pilote/projet/agi/docker && docker-compose up -d
+                    </code>
+
+                    <h3>Test GraphQL</h3>
+                    <code style="display: block; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 4px; margin: 10px 0;">
+                        curl -X POST http://localhost:8000/graphql \
+                          -H "Content-Type: application/json" \
+                          -d '{"query": "{ healthCheck { service status } }"}'
+                    </code>
+
+                    <h3>View Logs</h3>
+                    <code style="display: block; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 4px; margin: 10px 0;">
+                        docker-compose logs -f backend
+                    </code>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status Bar -->
+        <div class="card" style="margin-top: 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+            <h2 style="color: white;">System Status</h2>
+            <div class="metrics">
+                <div class="metric">
+                    <div class="metric-value">✅</div>
+                    <div class="metric-label">PostgreSQL + pgvector</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">✅</div>
+                    <div class="metric-label">Redis Stack</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">✅</div>
+                    <div class="metric-label">FastAPI Backend</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">✅</div>
+                    <div class="metric-label">GraphQL + WebSocket</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">✅</div>
+                    <div class="metric-label">LangChain/LangGraph</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">✅</div>
+                    <div class="metric-label">Memory RAG</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">✅</div>
+                    <div class="metric-label">Agent Service</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">✅</div>
+                    <div class="metric-label">Cache L1/L2</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Auto-refresh status every 5 seconds
+        setInterval(() => {
+            fetch('http://localhost:8000/health')
+                .then(r => r.json())
+                .then(data => {
+                    document.querySelectorAll('.status').forEach(el => {
+                        el.style.background = data.status === 'healthy' ? '#4CAF50' : '#f44336';
+                    });
+                })
+                .catch(() => {
+                    document.querySelectorAll('.status').forEach(el => {
+                        el.style.background = '#f44336';
+                    });
+                });
+        }, 5000);
+    </script>
+</body>
+</html>

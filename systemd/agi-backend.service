@@ -1,0 +1,39 @@
+[Unit]
+Description=AGI Backend API - FastAPI GraphQL Server
+Documentation=https://github.com/anthropics/claude-code
+After=network.target postgresql.service redis.service
+Wants=postgresql.service redis.service
+
+[Service]
+Type=simple
+User=pilote
+Group=pilote
+WorkingDirectory=/home/pilote/projet/agi/backend
+
+# Environment
+Environment="PYTHONUNBUFFERED=1"
+Environment="PYTHONPATH=/home/pilote/projet/agi/backend"
+EnvironmentFile=/home/pilote/projet/agi/backend/.env
+
+# Execute
+ExecStart=/usr/bin/python3 -m uvicorn main:app --host 0.0.0.0 --port 8000 --workers 4
+
+# Restart policy
+Restart=always
+RestartSec=10
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=agi-backend
+
+# Security
+NoNewPrivileges=true
+PrivateTmp=true
+
+# Resource limits
+MemoryLimit=2G
+TasksMax=50
+
+[Install]
+WantedBy=multi-user.target

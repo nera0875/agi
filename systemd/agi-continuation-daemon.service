@@ -1,0 +1,38 @@
+[Unit]
+Description=AGI Continuation Daemon - Auto-reinvoke Sonnet via LISTEN/NOTIFY
+After=network.target postgresql.service agi-worker-pool.service
+Wants=postgresql.service agi-worker-pool.service
+
+[Service]
+Type=simple
+User=pilote
+Group=pilote
+WorkingDirectory=/home/pilote/projet/agi
+
+# Environment
+Environment="PYTHONUNBUFFERED=1"
+Environment="CONTINUATION_ENABLED=true"
+Environment="CLAUDE_CLI_PATH=claude"
+
+# Execute
+ExecStart=/usr/bin/python3 /home/pilote/projet/agi/cortex/continuation_daemon.py
+
+# Restart policy
+Restart=always
+RestartSec=5s
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=agi-continuation-daemon
+
+# Resource limits
+MemoryLimit=1G
+TasksMax=20
+
+# Security
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,76 @@
+# AGI Memory System - Dependencies
+# Stack: OpenAI + Anthropic + Cohere + Voyage + LangChain/LangGraph
+
+# ═══════════════════════════════════════════════════════
+# CORE FRAMEWORKS
+# ═══════════════════════════════════════════════════════
+
+# LangChain ecosystem
+langchain>=0.3.0
+langchain-core>=0.3.0
+langchain-community>=0.3.0
+langgraph>=0.2.0
+langsmith>=0.1.0
+
+# LangChain integrations
+langchain-openai>=0.2.0
+langchain-anthropic>=0.2.0
+langchain-cohere>=0.3.0
+
+# MCP (Model Context Protocol)
+mcp>=1.0.0
+langchain-mcp-adapters>=0.1.0
+
+# ═══════════════════════════════════════════════════════
+# AI PROVIDERS
+# ═══════════════════════════════════════════════════════
+
+# OpenAI (GPT-5, o3, o3-deep-research)
+openai>=1.54.0
+
+# Anthropic Claude (3.5 Haiku/Sonnet, 3 Opus)
+anthropic>=0.39.0
+
+# Cohere (Rerank v3.5, Classify)
+cohere>=5.11.0
+
+# Voyage AI (Code-2, v3-large, Rerank-2)
+voyageai>=0.3.0
+
+# ═══════════════════════════════════════════════════════
+# DATABASES & STORAGE
+# ═══════════════════════════════════════════════════════
+
+# PostgreSQL
+asyncpg>=0.29.0
+psycopg2-binary>=2.9.9
+
+# Redis (L1 working memory)
+redis>=5.1.0
+hiredis>=3.0.0
+
+# Neo4j (Graph memory L3)
+neo4j>=5.25.0
+
+# Vector extensions
+pgvector>=0.3.0
+
+# ═══════════════════════════════════════════════════════
+# UTILITIES
+# ═══════════════════════════════════════════════════════
+
+# Async support
+aiohttp>=3.10.0
+asyncio>=3.4.3
+
+# Data processing
+pydantic>=2.9.0
+python-dotenv>=1.0.0
+tiktoken>=0.8.0
+
+# Monitoring
+prometheus-client>=0.21.0
+
+# Testing
+pytest>=8.3.0
+pytest-asyncio>=0.24.0

@@ -1,0 +1,47 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3:*)",
+      "Bash(pip3 install:*)",
+      "Bash(sudo -u postgres psql:*)",
+      "Bash(sudo -S -u postgres psql:*)",
+      "Bash(sudo -S -u postgres createdb:*)",
+      "Bash(sudo -S -u postgres dropdb:*)",
+      "Bash(source ~/.bashrc)",
+      "Read(//home/pilote/.opencode/bin/**)",
+      "Bash(~/.opencode/bin/opencode:*)",
+      "WebSearch",
+      "Bash(env)",
+      "Read(//home/pilote/.claude/**)",
+      "Read(//home/pilote/**)",
+      "Bash(claude mcp list:*)",
+      "mcp__smithery-ai-fetch__fetch_url",
+      "mcp__smithery-ai-fetch__extract_elements",
+      "Read(//tmp/**)",
+      "Bash(cat:*)",
+      "Bash(PGPASSWORD=agi_password psql:*)",
+      "Bash(PGPASSWORD=mysecretpassword psql:*)",
+      "Bash(wget:*)",
+      "Bash(tar:*)",
+      "Bash(mv:*)",
+      "Bash(rm:*)",
+      "Bash(touch:*)",
+      "Bash(./ts3server_startscript.sh:*)",
+      "Bash(awk:*)",
+      "mcp__agi-tools__pg_query",
+      "mcp__agi-tools__memory_search",
+      "mcp__agi-tools__list_my_mcps",
+      "mcp__agi-tools__discover_mcp",
+      "mcp__agi-tools__use_mcp",
+      "mcp__agi-tools__pg_schema"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "agi-memory",
+    "mcp-router",
+    "smithery-ai-fetch",
+    "exa",
+    "agi-tools"
+  ]
+}

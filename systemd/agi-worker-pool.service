@@ -1,0 +1,40 @@
+[Unit]
+Description=AGI Worker Pool - Async task executor with process isolation
+After=network.target postgresql.service
+Wants=postgresql.service
+
+[Service]
+Type=simple
+User=pilote
+Group=pilote
+WorkingDirectory=/home/pilote/projet/agi
+
+# Environment
+Environment="PYTHONUNBUFFERED=1"
+Environment="WORKER_POOL_SIZE=10"
+Environment="TASK_POLL_INTERVAL=0.5"
+Environment="MAX_TASK_DURATION=600"
+Environment="CLAUDE_CLI_PATH=claude"
+
+# Execute
+ExecStart=/usr/bin/python3 /home/pilote/projet/agi/cortex/worker_pool.py
+
+# Restart policy
+Restart=always
+RestartSec=5s
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=agi-worker-pool
+
+# Resource limits
+MemoryLimit=2G
+TasksMax=50
+
+# Security
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

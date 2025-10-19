@@ -1,0 +1,38 @@
+[Unit]
+Description=AGI Prometheus Exporter - Real-time observability metrics
+After=network.target postgresql.service
+Wants=postgresql.service
+
+[Service]
+Type=simple
+User=pilote
+Group=pilote
+WorkingDirectory=/home/pilote/projet/agi
+
+# Environment
+Environment="PYTHONUNBUFFERED=1"
+Environment="METRICS_PORT=9090"
+Environment="METRICS_UPDATE_INTERVAL=10"
+
+# Execute
+ExecStart=/usr/bin/python3 /home/pilote/projet/agi/cortex/prometheus_exporter.py
+
+# Restart policy
+Restart=always
+RestartSec=5s
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=agi-prometheus-exporter
+
+# Resource limits
+MemoryLimit=512M
+TasksMax=20
+
+# Security
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

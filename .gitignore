@@ -1,0 +1,25 @@
+# Node modules
+node_modules/
+*/node_modules/
+
+# Build outputs
+dist/
+build/
+*.pyc
+__pycache__/
+
+# Environment files
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
