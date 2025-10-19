@@ -18,6 +18,8 @@ import asyncio
 import json
 import logging
 import subprocess
+import sys
+from pathlib import Path
 from typing import Any, Optional
 
 import asyncpg
@@ -27,6 +29,11 @@ from mcp.server import Server
 from mcp.server.stdio import stdio_server
 from mcp.types import Tool, TextContent
 
+# Add backend services to path for Voyage AI and Cohere
+backend_services_path = str(Path(__file__).parent.parent / 'backend' / 'services')
+if backend_services_path not in sys.path:
+    sys.path.insert(0, backend_services_path)
+
 # Logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger("agi-tools")
@@ -34,8 +41,45 @@ logger = logging.getLogger("agi-tools")
 # Database config
 DATABASE_URL = "postgresql://agi_user:agi_password@localhost:5432/agi_db"
 
+# Import Voyage AI and Cohere wrappers
+try:
+    from voyage_wrapper import set_db_pool as set_voyage_pool, semantic_search, embed_single
+    from cohere_wrapper import set_db_pool as set_cohere_pool, rerank, hybrid_search_and_rerank
+    VOYAGE_COHERE_AVAILABLE = True
+    logger.info("✅ Voyage AI and Cohere wrappers loaded")
+except ImportError as e:
+    logger.warning(f"⚠️  Voyage AI / Cohere wrappers not available: {e}")
+    VOYAGE_COHERE_AVAILABLE = False
+
+# Import Local Fetch MCP (remplacement Smithery)
+try:
+    from local_fetch_mcp import fetch_url as local_fetch, extract_elements as local_extract, get_page_metadata as local_metadata
+    LOCAL_FETCH_AVAILABLE = True
+    logger.info("✅ Local Fetch MCP loaded (remplacement Smithery)")
+except ImportError as e:
+    logger.warning(f"⚠️  Local Fetch not available: {e}")
+    LOCAL_FETCH_AVAILABLE = False
+
+# Import Local Search MCPs (Exa, Docfork, Context7 fallbacks)
+try:
+    from local_search_mcps import exa_search, docfork_search, context7_resolve_library, context7_get_docs
+    LOCAL_SEARCH_AVAILABLE = True
+    logger.info("✅ Local Search MCPs loaded (Exa/Docfork/Context7 fallbacks)")
+except ImportError as e:
+    logger.warning(f"⚠️  Local Search MCPs not available: {e}")
+    LOCAL_SEARCH_AVAILABLE = False
+
+# Import Local MCP Router (MCPs hébergés localement)
+try:
+    from local_mcp_router import route_mcp_call, list_local_mcps, get_mcp_client
+    LOCAL_MCP_ROUTER_AVAILABLE = True
+    logger.info("✅ Local MCP Router loaded (Exa/Context7/Fetch hébergés localement)")
+except ImportError as e:
+    logger.warning(f"⚠️  Local MCP Router not available: {e}")
+    LOCAL_MCP_ROUTER_AVAILABLE = False
+
 # Smithery config
-SMITHERY_API_KEY = "0cccee52-3826-4658-8e05-b35aaf2627f1"
+SMITHERY_API_KEY = "15d7d8e1-61c3-4dba-a91f-63751eec8b08"
 SMITHERY_PROFILE = "rolling-ladybug-4DEfPv"
 SMITHERY_REGISTRY_URL = "https://registry.smithery.ai/servers"
 
@@ -576,6 +620,193 @@ Example:
         ),
 
         # ═══════════════════════════════════════════════════════
+        # WEB FETCH TOOLS (Local, no Smithery needed)
+        # ═══════════════════════════════════════════════════════
+
+        Tool(
+            name="fetch_url",
+            description="""Fetch content from any URL (docs, articles, APIs).
+
+DIRECT Python httpx + BeautifulSoup, NO Smithery dependency.
+Parses HTML and extracts clean text.
+
+Example:
+  fetch_url("https://docs.claude.com/hooks-guide", max_length=50000)
+""",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "url": {
+                        "type": "string",
+                        "description": "URL to fetch"
+                    },
+                    "max_length": {
+                        "type": "number",
+                        "description": "Max content length (default: 50000)",
+                        "default": 50000
+                    }
+                },
+                "required": ["url"]
+            }
+        ),
+
+        Tool(
+            name="extract_elements",
+            description="""Extract specific HTML elements using CSS selectors.
+
+Example:
+  extract_elements("https://example.com", "h2")  # All h2 headers
+  extract_elements("https://example.com", ".main-content")  # Class selector
+""",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "url": {
+                        "type": "string",
+                        "description": "URL to extract from"
+                    },
+                    "selector": {
+                        "type": "string",
+                        "description": "CSS selector (e.g. 'h2', '.content', '#main')"
+                    }
+                },
+                "required": ["url", "selector"]
+            }
+        ),
+
+        Tool(
+            name="get_page_metadata",
+            description="""Get page metadata (title, description, OpenGraph tags).
+
+Useful for understanding page content before fetching.
+
+Example:
+  get_page_metadata("https://docs.claude.com/hooks-guide")
+""",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "url": {
+                        "type": "string",
+                        "description": "URL to get metadata from"
+                    }
+                },
+                "required": ["url"]
+            }
+        ),
+
+        # ═══════════════════════════════════════════════════════
+        # SEARCH TOOLS (Local Exa/Docfork/Context7 fallbacks)
+        # ═══════════════════════════════════════════════════════
+
+        Tool(
+            name="exa_search",
+            description="""Intelligent web search (Exa fallback local).
+
+Uses DuckDuckGo + metadata extraction if no Exa API key.
+Set EXA_API_KEY env for official Exa API.
+
+Example:
+  exa_search("FastAPI async best practices 2025", num_results=5)
+  exa_search("Claude Code hooks", num_results=3, include_domains=["docs.claude.com"])
+""",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "query": {
+                        "type": "string",
+                        "description": "Search query"
+                    },
+                    "num_results": {
+                        "type": "number",
+                        "description": "Number of results (default: 5)",
+                        "default": 5
+                    },
+                    "include_domains": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "Filter results to specific domains"
+                    }
+                },
+                "required": ["query"]
+            }
+        ),
+
+        Tool(
+            name="docfork_search",
+            description="""Search GitHub documentation (Docfork local fallback).
+
+Searches markdown docs in GitHub repositories.
+Set GITHUB_TOKEN env for better rate limits.
+
+Example:
+  docfork_search("FastAPI lifespan events", limit=5)
+""",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "query": {
+                        "type": "string",
+                        "description": "Search query"
+                    },
+                    "limit": {
+                        "type": "number",
+                        "description": "Max results (default: 5)",
+                        "default": 5
+                    }
+                },
+                "required": ["query"]
+            }
+        ),
+
+        Tool(
+            name="context7_resolve",
+            description="""Resolve library ID (Context7 local fallback).
+
+Searches npm + PyPI for library info.
+
+Example:
+  context7_resolve("fastapi")  # Returns library metadata
+""",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "library_name": {
+                        "type": "string",
+                        "description": "Library name (e.g. 'fastapi', 'react')"
+                    }
+                },
+                "required": ["library_name"]
+            }
+        ),
+
+        Tool(
+            name="context7_docs",
+            description="""Get library documentation (Context7 local fallback).
+
+Fetches README + docs from GitHub.
+
+Example:
+  context7_docs("/npm/fastapi", query="async")
+""",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "library_id": {
+                        "type": "string",
+                        "description": "Library ID (from context7_resolve)"
+                    },
+                    "query": {
+                        "type": "string",
+                        "description": "Optional filter query",
+                        "default": ""
+                    }
+                },
+                "required": ["library_id"]
+            }
+        ),
+
+        # ═══════════════════════════════════════════════════════
         # SMITHERY TOOLS (MCP Discovery + Execution)
         # ═══════════════════════════════════════════════════════
 
@@ -609,16 +840,18 @@ Example:
 
         Tool(
             name="use_mcp",
-            description="""Execute tool on any MCP via Smithery (4000+ MCPs available).
+            description="""Execute tool on any MCP via Smithery HTTP API (4000+ MCPs available).
 
-Process management: Spawns on-demand, reuses existing, auto-cleanup after 5min.
-Limit: 10 concurrent processes max (~1GB RAM max).
+ZERO installation: Direct HTTP calls to https://server.smithery.ai/{mcp_id}/mcp
+NO subprocess, NO npx, NO process management.
+Smithery handles everything server-side (caching, scaling, etc.)
 
 Example:
   use_mcp("exa", "web_search_exa", {"query": "RAG 2025", "num_results": 5})
+  use_mcp("@upstash/context7-mcp", "resolve-library-id", {"libraryName": "react"})
   use_mcp("@smithery-ai/fetch", "fetch_url", {"url": "https://example.com"})
 
-Note: Tool names may vary per MCP (check discover_mcp results)
+Note: Tool names vary per MCP (use discover_mcp or check CLAUDE.md)
 """,
             inputSchema={
                 "type": "object",
@@ -823,6 +1056,56 @@ async def call_tool(name: str, arguments: Any) -> list[TextContent]:
             return [TextContent(type="text", text=json.dumps(result, indent=2, default=str))]
 
         # ═══════════════════════════════════════════════════════
+        # SEARCH TOOLS (Local)
+        # ═══════════════════════════════════════════════════════
+
+        elif name == "exa_search":
+            if not LOCAL_SEARCH_AVAILABLE:
+                return [TextContent(type="text", text=json.dumps({
+                    "error": "Local search not available"
+                }, indent=2))]
+
+            result = await exa_search(
+                arguments["query"],
+                arguments.get("num_results", 5),
+                arguments.get("include_domains")
+            )
+            return [TextContent(type="text", text=json.dumps(result, indent=2, default=str))]
+
+        elif name == "docfork_search":
+            if not LOCAL_SEARCH_AVAILABLE:
+                return [TextContent(type="text", text=json.dumps({
+                    "error": "Local search not available"
+                }, indent=2))]
+
+            result = await docfork_search(
+                arguments["query"],
+                arguments.get("limit", 5)
+            )
+            return [TextContent(type="text", text=json.dumps(result, indent=2, default=str))]
+
+        elif name == "context7_resolve":
+            if not LOCAL_SEARCH_AVAILABLE:
+                return [TextContent(type="text", text=json.dumps({
+                    "error": "Local search not available"
+                }, indent=2))]
+
+            result = await context7_resolve_library(arguments["library_name"])
+            return [TextContent(type="text", text=json.dumps(result, indent=2, default=str))]
+
+        elif name == "context7_docs":
+            if not LOCAL_SEARCH_AVAILABLE:
+                return [TextContent(type="text", text=json.dumps({
+                    "error": "Local search not available"
+                }, indent=2))]
+
+            result = await context7_get_docs(
+                arguments["library_id"],
+                arguments.get("query", "")
+            )
+            return [TextContent(type="text", text=json.dumps(result, indent=2, default=str))]
+
+        # ═══════════════════════════════════════════════════════
         # OLD TOOLS (backwards compatibility, will be removed)
         # ═══════════════════════════════════════════════════════
 
@@ -907,6 +1190,44 @@ async def call_tool(name: str, arguments: Any) -> list[TextContent]:
                 arguments.get("output_format", "stream-json"),
                 arguments.get("timeout", 120)
             )
+            return [TextContent(type="text", text=json.dumps(result, indent=2))]
+
+        # ═══════════════════════════════════════════════════════
+        # WEB FETCH TOOLS (Local)
+        # ═══════════════════════════════════════════════════════
+
+        elif name == "fetch_url":
+            if not LOCAL_FETCH_AVAILABLE:
+                return [TextContent(type="text", text=json.dumps({
+                    "error": "Local fetch not available",
+                    "install": "pip install httpx beautifulsoup4"
+                }, indent=2))]
+
+            result = await local_fetch(
+                arguments["url"],
+                arguments.get("max_length", 50000)
+            )
+            return [TextContent(type="text", text=json.dumps(result, indent=2))]
+
+        elif name == "extract_elements":
+            if not LOCAL_FETCH_AVAILABLE:
+                return [TextContent(type="text", text=json.dumps({
+                    "error": "Local fetch not available"
+                }, indent=2))]
+
+            result = await local_extract(
+                arguments["url"],
+                arguments["selector"]
+            )
+            return [TextContent(type="text", text=json.dumps(result, indent=2, default=str))]
+
+        elif name == "get_page_metadata":
+            if not LOCAL_FETCH_AVAILABLE:
+                return [TextContent(type="text", text=json.dumps({
+                    "error": "Local fetch not available"
+                }, indent=2))]
+
+            result = await local_metadata(arguments["url"])
             return [TextContent(type="text", text=json.dumps(result, indent=2))]
 
         # ═══════════════════════════════════════════════════════
@@ -1491,34 +1812,87 @@ def infer_capabilities(description: str, category: str, hints: list) -> list:
 
 async def use_mcp(mcp_id: str, tool: str, args: dict) -> dict:
     """
-    Execute MCP tool via SmitheryProcessManager (COUCHE 3: Execution)
+    Execute MCP tool - HYBRID: Local first, Smithery fallback
 
-    1. Use SmitheryProcessManager for process lifecycle
-    2. Auto-spawn if needed, reuse if exists
-    3. Auto-cleanup after 5min inactivity
-    4. Limit: 10 concurrent processes max
-    5. Cache persistent des MCPs en PostgreSQL pour réutilisation future
+    PRIORITÉ 1: MCPs locaux hébergés (exa, context7, fetch)
+    PRIORITÉ 2: Smithery HTTP API (4000+ MCPs)
+
+    Avantages MCPs locaux:
+    - Pas de token API nécessaire
+    - Latence ultra-faible (<50ms)
+    - Contrôle total
+    - Pas de rate limits
+
+    Avantages Smithery:
+    - 4000+ MCPs disponibles
+    - Pas d'installation locale
+    - Scaling automatique
     """
-    from smithery_process_manager import get_manager
+    # PRIORITÉ 1: Essayer MCP local d'abord
+    if LOCAL_MCP_ROUTER_AVAILABLE and mcp_id in ["exa", "context7", "fetch"]:
+        logger.info(f"🏠 Local MCP call to {mcp_id}.{tool}({args})")
+        try:
+            result = await route_mcp_call(mcp_id, tool, args)
+            logger.info(f"✅ {mcp_id}.{tool} executed locally")
+            return {"content": result, "source": "local"}
+        except Exception as e:
+            logger.warning(f"⚠️  Local MCP failed, trying Smithery fallback: {e}")
+            # Continue to Smithery fallback
 
-    logger.info(f"Executing {mcp_id}.{tool}({args})")
+    # PRIORITÉ 2: Smithery HTTP
+    logger.info(f"🌐 Smithery HTTP call to {mcp_id}.{tool}({args})")
 
     try:
-        # Get process manager avec db_pool pour cache persistent
-        manager = await get_manager(db_pool=db_pool)
+        # Smithery HTTP endpoint
+        url = f"https://server.smithery.ai/{mcp_id}/mcp"
 
-        # Call tool (manager handles everything + cache)
-        result = await manager.call_tool(mcp_id, tool, args, timeout=30)
+        # JSON-RPC 2.0 request
+        request_data = {
+            "jsonrpc": "2.0",
+            "id": 1,
+            "method": "tools/call",
+            "params": {
+                "name": tool,
+                "arguments": args
+            }
+        }
 
-        # Update usage stats
-        async with db_pool.acquire() as conn:
-            await conn.execute(
-                "UPDATE known_mcps SET usage_count = usage_count + 1, last_used = NOW() WHERE mcp_id = $1",
-                mcp_id
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.post(
+                url,
+                json=request_data,
+                params={"profile": SMITHERY_PROFILE},
+                headers={
+                    "Authorization": f"Bearer {SMITHERY_API_KEY}",
+                    "Content-Type": "application/json"
+                }
             )
 
-        return result
+            response.raise_for_status()
+            result = response.json()
 
+            # Check for JSON-RPC error
+            if "error" in result:
+                error_msg = result["error"].get("message", str(result["error"]))
+                raise Exception(f"MCP error: {error_msg}")
+
+            # Update usage stats
+            async with db_pool.acquire() as conn:
+                await conn.execute("""
+                    INSERT INTO smithery_mcp_cache (mcp_id, call_count, last_used)
+                    VALUES ($1, 1, NOW())
+                    ON CONFLICT (mcp_id) DO UPDATE
+                    SET call_count = smithery_mcp_cache.call_count + 1,
+                        last_used = NOW()
+                """, mcp_id)
+
+            logger.info(f"✅ {mcp_id}.{tool} executed via HTTP")
+
+            return result.get("result", result)
+
+    except httpx.HTTPStatusError as e:
+        logger.error(f"HTTP error: {e.response.status_code} - {e.response.text}")
+        raise Exception(f"Smithery HTTP error: {e.response.status_code}")
     except Exception as e:
         logger.error(f"use_mcp error: {e}")
         raise
