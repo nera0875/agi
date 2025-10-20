@@ -28,10 +28,14 @@ from typing import Any, Optional
 import asyncpg
 import httpx
 import redis
+from dotenv import load_dotenv
 
 from mcp.server import Server
 from mcp.server.stdio import stdio_server
 from mcp.types import Tool, TextContent
+
+# Load .env file for API keys
+load_dotenv()
 
 # Add backend services to path for Voyage AI and Cohere
 backend_services_path = str(Path(__file__).parent.parent / 'backend' / 'services')

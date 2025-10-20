@@ -10,8 +10,12 @@ import asyncpg
 import os
 from typing import List, Optional
 import logging
+from dotenv import load_dotenv
 
 logger = logging.getLogger(__name__)
+
+# Load .env file for API keys
+load_dotenv()
 
 # Voyage AI Config
 VOYAGE_API_KEY = os.getenv("VOYAGE_API_KEY", "")
