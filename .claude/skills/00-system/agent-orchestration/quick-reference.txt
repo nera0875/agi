@@ -1,0 +1,216 @@
+================================================================================
+AGENT ORCHESTRATION - QUICK REFERENCE
+================================================================================
+
+AGENTS (8 totaux - tous Haiku):
+  ask       → Explore codebase (read-only)
+  research  → Web search (exa, fetch, context7)
+  architect → Design architecture, ADR
+  code      → Backend Python/FastAPI
+  frontend  → React/TypeScript
+  debug     → Tests, debugging
+  docs      → Documentation
+  sre       → Infrastructure, monitoring
+
+================================================================================
+PHASES (6 séquentielles - agents parallèles):
+
+  1. UNDERSTANDING (ask)
+     Ask about current codebase
+     Agents: 1-10 parallèle
+     Deadline: 20s
+
+  2. RESEARCH (research)
+     Research external knowledge
+     Agents: 1-5 parallèle
+     Deadline: 15s each
+
+  3. ARCHITECTURE (architect)
+     Design solution, ADR
+     Agents: 1-3 (usually 1)
+     Deadline: 30s
+
+  4. IMPLEMENTATION (code + frontend)
+     Code backend/frontend
+     Agents: 1-5 parallèle
+     Deadline: 30-60s
+
+  5. VALIDATION (debug)
+     Tests, debugging
+     Agents: 2-3 parallèle
+     Deadline: 20-30s
+
+  6. DOCUMENTATION (docs)
+     README, API docs
+     Agents: 1
+     Deadline: 30s
+
+================================================================================
+INVOCATION FORMAT:
+
+Task(agent, """
+[ULTRA-PRECISE TASK]
+
+DEADLINE: [X]s MAX
+SCOPE: [Exactly what - no more]
+PARTIAL OK: [yes/no]
+FORMAT: JSON
+
+Output: {...}
+""")
+
+================================================================================
+DECISION: Which Agent?
+
+Read code?              → ask
+Search web?             → research
+Design system?          → architect
+Code backend/Python?    → code
+Code React/TypeScript?  → frontend
+Test/debug?             → debug
+Write docs?             → docs
+Monitor infrastructure? → sre
+
+================================================================================
+RULES (NON-NEGOTIABLE):
+
+✅ DO:
+  - MOI invoque agents only
+  - Agents return JSON
+  - MOI orchestrates phases
+  - Parallel if independent
+  - Sequential if dependent
+  - Ultra-precise prompts
+  - Strict deadlines
+
+❌ DON'T:
+  - Agent calls agent
+  - Vague prompts
+  - No deadlines
+  - Write 1 file per agent (1 file = 1 agent MAX)
+  - Circular dependencies (A→B→C→A)
+
+================================================================================
+QUICK SCENARIOS:
+
+AUDIT BACKEND (20s):
+  Task(ask, "backend/services/* - classes only")
+  Task(ask, "backend/api/* - endpoints only")
+  Task(ask, "backend/routes/* - routes only")
+
+FEATURE FULL-STACK (2h):
+  Phase 1: Task(ask, "current auth")
+  Phase 2: Task(research, "JWT practices")
+  Phase 3: Task(architect, "JWT design")
+  Phase 4: Task(code, "...") + Task(frontend, "...")
+  Phase 5: Task(debug, "...")
+  Phase 6: Task(docs, "...")
+
+BUG FIX URGENT (10m):
+  Phase 4: Task(code, "fix crash")
+  Phase 5: Task(debug, "test fix")
+
+PERFORMANCE OPT (1h):
+  Phase 1: Task(ask, "slow queries")
+  Phase 2: Task(research, "optimization patterns")
+  Phase 3: Task(architect, "optimization plan")
+  Phase 4: Task(code, "add indexes") + Task(code, "eager loading")
+  Phase 5: Task(debug, "benchmark")
+
+================================================================================
+MCP CONFIGURATION:
+
+research agent NEEDS MCPs:
+  tools: Read, Glob, Grep, mcp__exa__web_search_exa,
+         mcp__exa__get_code_context_exa, mcp__smithery-ai-fetch__fetch_url,
+         mcp__upstash-context-7-mcp__get-library-docs
+
+other agents DON'T need MCPs:
+  tools: Read, Write, Edit, Bash, Glob, Grep
+
+================================================================================
+WHEN TO SKIP PHASES:
+
+Skip Phase 1 (ask)     if: new feature from scratch
+Skip Phase 2 (research) if: known tech stack
+Skip Phase 3 (architect) if: simple bug fix
+Skip Phase 6 (docs)     if: internal feature only
+
+================================================================================
+TOKEN ECONOMY:
+
+Solo approach:    30,000 tokens
+Agent pipeline:    3,400 tokens
+ECONOMY:          89% saved
+
+Reason: Agent conversations isolated (not in history)
+
+================================================================================
+CHECKLIST:
+
+Before invoking agents:
+  ✓ Task ultra-precise (not vague)
+  ✓ Scope clear (what to do, no more)
+  ✓ Resources identified
+  ✓ No circular dependencies
+  ✓ MCPs specified (if external access needed)
+  ✓ Deadline included
+  ✓ Parallel vs sequential decided
+
+After agents complete:
+  ✓ JSON parsed
+  ✓ Inconsistencies detected
+  ✓ Next phase decided
+  ✓ Partial results acceptable
+
+================================================================================
+EXAMPLE PROMPT:
+
+Task(code, """
+Backend: Create GraphQL mutation for notifications
+
+File: backend/api/schema.py
+
+1. Add Notification type
+2. Add send_notification mutation
+3. Add input validation
+4. Return mutation implementation
+
+DEADLINE: 45s
+SCOPE: Just the mutation (no resolver logic)
+PARTIAL OK: Yes
+
+Output: {{mutation_code: "..."}}
+""")
+
+================================================================================
+ANTI-PATTERNS:
+
+❌ Chain agents:
+  Task(ask, "...") → wait
+  Task(research, "...") → wait
+  Task(architect, "...") → slow!
+
+✅ Parallel independent tasks:
+  Task(ask, "backend")
+  Task(ask, "frontend")
+  Task(ask, "database")
+  # All run together = fast!
+
+❌ Vague prompts:
+  "Analyse le code"
+  → Agent confused, slow
+
+✅ Precise prompts:
+  "backend/services/memory*.py - list public methods only"
+  → Agent knows exactly what to do
+
+================================================================================
+LINKS:
+
+Full guide:    .claude/skills/00-system/agent-orchestration/agent-orchestration.md
+Examples:      .claude/skills/00-system/agent-orchestration/examples.md
+CLAUDE.md ref: Lines 426-760
+
+================================================================================
+Last updated: 2025-10-20

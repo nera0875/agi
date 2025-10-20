@@ -1,0 +1,140 @@
+{
+  "skill": "agent-orchestration",
+  "version": "1.0.0",
+  "created": "2025-10-20",
+  "status": "complete",
+  "sources": ["CLAUDE.md (lines 426-760)"],
+  "files": {
+    "entry_points": {
+      "README.md": {
+        "purpose": "Overview and navigation hub",
+        "read_time": "5 min",
+        "audience": "All",
+        "sections": [
+          "Concept overview",
+          "Quick use cases",
+          "Files guide",
+          "Links to other resources"
+        ]
+      },
+      "quick-reference.txt": {
+        "purpose": "Cheat sheet and decision trees",
+        "read_time": "5 min",
+        "audience": "Quick lookup",
+        "sections": [
+          "Agents list (8 total)",
+          "Phases (6 sequential)",
+          "Decision: which agent?",
+          "Quick scenarios",
+          "MCP configuration",
+          "Anti-patterns"
+        ]
+      }
+    },
+    "main_content": {
+      "agent-orchestration.md": {
+        "purpose": "Complete orchestration guide",
+        "read_time": "20 min",
+        "audience": "In-depth learning",
+        "sections": [
+          "6 phases pipeline",
+          "8 agents available",
+          "Task selection guide",
+          "Rules and patterns",
+          "Full example (notifications)",
+          "MCP configuration",
+          "Strategy and deadlines"
+        ],
+        "lines": 389,
+        "checkmarks": "YAML frontmatter included"
+      },
+      "examples.md": {
+        "purpose": "Practical examples with code",
+        "read_time": "15 min",
+        "audience": "Hands-on practitioners",
+        "sections": [
+          "Example 1: Audit backend (parallel)",
+          "Example 2: Refactoring memory (complex)",
+          "Example 3: Feature UI (simple)",
+          "Example 4: Bug fix (urgent)",
+          "Example 5: Performance optimization",
+          "Example 6: Dependencies (sequential)",
+          "Anti-patterns to avoid"
+        ],
+        "lines": 300,
+        "code_examples": 6,
+        "python_examples": true
+      }
+    },
+    "metadata": {
+      ".skill-meta.json": {
+        "purpose": "Skill metadata and structure",
+        "format": "JSON",
+        "includes": [
+          "Skill name, version, description",
+          "File manifest with descriptions",
+          "Agent list (8 agents)",
+          "Phase list (6 phases)",
+          "MCP list (5 MCPs)",
+          "Key concepts (8 items)",
+          "Use cases (8 scenarios)",
+          "Rules (8 rules)"
+        ]
+      }
+    }
+  },
+  "navigation_guide": {
+    "first_time_user": [
+      "1. Start with README.md (5 min)",
+      "2. Read quick-reference.txt (5 min)",
+      "3. Study agent-orchestration.md (20 min)",
+      "4. Review examples.md for your use case (10 min)",
+      "5. Apply to your project"
+    ],
+    "quick_lookup": [
+      "Check quick-reference.txt first",
+      "Use decision trees to choose agent",
+      "Follow example pattern from examples.md"
+    ],
+    "deep_dive": [
+      "Read agent-orchestration.md cover-to-cover",
+      "Study all 6 examples in examples.md",
+      "Review MCP configuration section",
+      "Reference .skill-meta.json for structure"
+    ]
+  },
+  "key_metrics": {
+    "total_lines": 1044,
+    "total_files": 5,
+    "agents_covered": 8,
+    "phases_covered": 6,
+    "examples_provided": 6,
+    "token_economy": "89% savings vs solo approach",
+    "speedup_factors": {
+      "audit_backend": "15x faster (20s vs 5min)",
+      "feature_implementation": "1.5x faster (2h vs 3h)",
+      "bug_fix": "3x faster (10min vs 30min)"
+    }
+  },
+  "quick_links": {
+    "README": "Introduction & navigation",
+    "quick-reference": "Decision trees & cheatsheet",
+    "agent-orchestration": "Complete guide & rules",
+    "examples": "6 practical use cases",
+    "metadata": "Skill structure & config"
+  },
+  "integration": {
+    "with_00_system_readme": "Added Agent Orchestration section",
+    "with_skills_structure": "Added to 00-system/ directory",
+    "with_other_skills": "Depends on CEO Mindset, Task Decomposition",
+    "with_CLAUDE_md": "Extracted lines 426-760"
+  },
+  "readiness": {
+    "documentation": "complete",
+    "examples": "complete",
+    "metadata": "complete",
+    "integration": "complete",
+    "testing": "ready for use",
+    "status": "PRODUCTION READY"
+  }
+}

@@ -1,0 +1,197 @@
+
+================================================================================
+AGENT ORCHESTRATION SKILL - START HERE
+================================================================================
+
+Welcome! This skill teaches you to orchestrate 8 agents in a 6-phase pipeline
+for maximum efficiency and token economy (89% savings).
+
+================================================================================
+CHOOSE YOUR PATH:
+================================================================================
+
+OPTION 1: I have 5 minutes (Quick Start)
+  → Read: quick-reference.txt
+  → Then: Choose an agent from the decision tree
+  → Do: Use the template to invoke an agent
+
+OPTION 2: I have 20 minutes (Full Understanding)
+  → Read: README.md
+  → Read: agent-orchestration.md
+  → Study: One example from examples.md that matches your need
+
+OPTION 3: I have 1 hour (Master It)
+  → Read: agent-orchestration.md (complete guide)
+  → Study: All 6 examples in examples.md
+  → Reference: .skill-meta.json for structure
+  → Apply: Create your own orchestration plan
+
+================================================================================
+WHAT WILL YOU LEARN?
+================================================================================
+
+✓ 6-Phase Pipeline
+  Phase 1: Understanding    - ask agents explore codebase
+  Phase 2: Research         - research agents learn external knowledge
+  Phase 3: Architecture     - architect agent designs solution
+  Phase 4: Implementation   - code & frontend agents build it
+  Phase 5: Validation       - debug agents test everything
+  Phase 6: Documentation    - docs agent writes it up
+
+✓ 8 Agents
+  ask       → Explore codebase (read-only)
+  research  → Search web (exa, fetch, context7)
+  architect → Design architecture, ADR
+  code      → Backend Python/FastAPI
+  frontend  → React/TypeScript
+  debug     → Tests, debugging
+  docs      → Documentation
+  sre       → Infrastructure, monitoring
+
+✓ Anti-Boomerang Principle
+  - Phases = sequential (strict order)
+  - Agents within phase = parallel (up to 20 agents)
+  - MOI = only orchestrates (you coordinate)
+  - Agents never call agents (only MOI invokes)
+
+✓ Performance Gains
+  - Audit backend: 20s (parallel) vs 5min (solo) = 15x speedup
+  - Features: 2h (pipeline) vs 3h (solo) = 33% faster
+  - Bug fixes: 10min (minimal) vs 30min (debug) = 3x faster
+  - Tokens: 3,400 (parallel) vs 30,000 (solo) = 89% savings
+
+================================================================================
+FILES IN THIS SKILL:
+================================================================================
+
+README.md
+  └─ Overview, navigation, use cases
+
+quick-reference.txt (← START HERE for quick lookup)
+  └─ Agents, phases, decision trees, cheatsheet
+
+agent-orchestration.md (← START HERE for full guide)
+  └─ Complete orchestration guide, rules, patterns
+
+examples.md (← 6 practical examples)
+  ├─ Audit backend (parallel investigation)
+  ├─ Refactor memory (complex feature)
+  ├─ Feature UI (full-stack simple)
+  ├─ Bug fix (urgent minimal)
+  ├─ Performance optimization
+  └─ Handling dependencies (sequential)
+
+.skill-meta.json
+  └─ Metadata, structure, configuration
+
+INDEX.json
+  └─ Navigation guide and metrics
+
+================================================================================
+QUICK DECISION: WHICH AGENT?
+================================================================================
+
+Need to:                          Use Agent:        Phase:
+─────────────────────────────────────────────────────────────
+Read existing code?               ask               1
+Search web documentation?         research          2
+Design a solution?                architect         3
+Code backend/Python?              code              4
+Code React UI?                    frontend          4
+Test & debug?                     debug             5
+Write documentation?              docs              6
+Monitor infrastructure?            sre               (separate)
+
+================================================================================
+BASIC INVOCATION TEMPLATE:
+================================================================================
+
+Task(agent_name, """
+[ULTRA-PRECISE TASK DESCRIPTION]
+
+DEADLINE: [X]s MAX
+SCOPE: [Exactly what to do - no more]
+PARTIAL OK: [yes/no]
+FORMAT: JSON
+
+Output: {...}
+""")
+
+Example:
+Task(ask, """
+Scan backend/services/memory*.py
+
+DEADLINE: 20s
+SCOPE: List classes + public methods only
+PARTIAL OK: Yes
+FORMAT: {files: [...], classes: [...]}
+
+Output: {files: [...], classes: [...]}
+""")
+
+================================================================================
+ANTI-PATTERNS TO AVOID:
+================================================================================
+
+❌ Chain agents (slow):
+  Task(ask, "...") → wait
+  Task(research, "...") → wait
+  Task(architect, "...") → slow!
+
+✅ Parallel independent tasks (fast):
+  Task(ask, "backend")
+  Task(ask, "frontend")
+  Task(ask, "database")
+  # All run together = fast!
+
+❌ Vague prompts (agent confused):
+  "Analyse le code"
+
+✅ Precise prompts (agent knows exactly):
+  "backend/services/memory*.py - list public methods only"
+
+❌ No deadlines (agent takes forever):
+  Task(ask, "look at code")
+
+✅ Strict deadlines (agent focuses):
+  Task(ask, "... DEADLINE: 20s MAX")
+
+================================================================================
+RULES (NON-NEGOTIABLE):
+================================================================================
+
+✓ DO:
+  - Phases sequential (Understanding → Research → ... → Documentation)
+  - Agents parallel (independent tasks run together)
+  - MOI orchestrates (only you invoke agents)
+  - Ultra-precise prompts (tell agent exactly what to do)
+  - Strict deadlines (20s, 30s, 60s - no open-ended)
+  - Aggregate results (JSON from agents → your decision)
+
+✗ DON'T:
+  - Agent → Agent (only MOI invokes)
+  - No deadlines (agent wastes time)
+  - Vague prompts (agent confused)
+  - Write 1 file per agent (risk conflicts)
+  - Circular dependencies (A→B→C→A)
+
+================================================================================
+NEXT STEPS:
+================================================================================
+
+1. Read quick-reference.txt (5 min)
+2. Choose your first use case from examples.md
+3. Follow the example pattern
+4. Invoke agents using the template
+5. Aggregate results and decide next phase
+
+================================================================================
+
+Ready? Pick your path above and dive in!
+
+Questions? Check INDEX.json or review agent-orchestration.md
+
+Last updated: 2025-10-20
+Status: PRODUCTION READY
+
+================================================================================

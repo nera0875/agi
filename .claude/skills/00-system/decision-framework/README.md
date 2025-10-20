@@ -246,6 +246,22 @@ except Exception as e:
 - Minor fix
 - Feature not user-facing
 
+## Agent Strategy (Pre-Tasking)
+
+**Before launching agents, strategic thinking:**
+
+1. **Decode Request** - Transform user intent into clear goal
+2. **Decompose** - Break into 5-10 independent micro-tasks
+3. **Map Resources** - What exists? What's dependencies?
+4. **Parallelize** - Read-only (20 agents ok), write (1 agent max)
+5. **Launch & Aggregate** - CEO orchestrates, not fire-and-forget
+
+**Result:** 64-80% token savings via parallel execution
+
+See: `instructions.md` Part 9 for full strategy
+
+---
+
 ## Related Skills
 
 - **CEO Mindset** - How to delegate 10-50 agents in parallel
@@ -255,7 +271,8 @@ except Exception as e:
 
 ---
 
-**Version:** 1.0.0
+**Version:** 1.1.0
 **Last Updated:** 2025-10-20
 **Category:** System - Orchestration
+**Changes:** Added Agent Strategy (Part 9) to instructions.md
 **Maintenance:** Review quarterly for new patterns

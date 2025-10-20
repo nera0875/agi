@@ -1,0 +1,103 @@
+{
+  "name": "agent-orchestration",
+  "version": "1.0.0",
+  "description": "Pipeline 6 phases, 8 agents, orchestration workflow, MCPs",
+  "category": "system",
+  "subcategory": "agents",
+  "priority": 100,
+  "load": "auto",
+  "tags": [
+    "agents",
+    "orchestration",
+    "workflow",
+    "pipeline",
+    "task-decomposition",
+    "mcps",
+    "parallel-execution",
+    "phase-management"
+  ],
+  "files": [
+    {
+      "name": "agent-orchestration.md",
+      "type": "guide",
+      "description": "Complete agent orchestration guide - phases, agents, MCPs, rules"
+    },
+    {
+      "name": "examples.md",
+      "type": "examples",
+      "description": "Practical examples - audit, refactoring, features, bug fixes"
+    },
+    {
+      "name": "quick-reference.txt",
+      "type": "cheatsheet",
+      "description": "Quick reference - agents, phases, commands, patterns"
+    },
+    {
+      "name": "README.md",
+      "type": "readme",
+      "description": "Overview and navigation"
+    }
+  ],
+  "dependencies": [
+    "ceo-mindset",
+    "task-decomposition",
+    "token-optimization"
+  ],
+  "agents": [
+    "ask",
+    "research",
+    "architect",
+    "code",
+    "frontend",
+    "debug",
+    "docs",
+    "sre"
+  ],
+  "phases": [
+    "understanding",
+    "research",
+    "architecture",
+    "implementation",
+    "validation",
+    "documentation"
+  ],
+  "mcps": [
+    "mcp__agi-tools__*",
+    "mcp__exa__web_search_exa",
+    "mcp__exa__get_code_context_exa",
+    "mcp__smithery-ai-fetch__fetch_url",
+    "mcp__upstash-context-7-mcp__get-library-docs"
+  ],
+  "key-concepts": [
+    "Anti-Boomerang principle",
+    "Sequential phases with parallel agents",
+    "Orchestration only via MOI",
+    "Token economy (89% savings)",
+    "Precise prompts, strict deadlines",
+    "Independent task execution",
+    "JSON aggregation"
+  ],
+  "use-cases": [
+    "Audit backend/frontend codebase",
+    "Feature implementation (full-stack)",
+    "Bug fixing (urgent)",
+    "Performance optimization",
+    "System refactoring",
+    "Architecture design",
+    "Documentation generation",
+    "Infrastructure monitoring"
+  ],
+  "rules": [
+    "Agents never call agents",
+    "MOI orchestrates only",
+    "Phases sequential, agents parallel",
+    "1 file = 1 agent (write operations)",
+    "No circular dependencies",
+    "Ultra-precise prompts",
+    "Strict deadlines required",
+    "Partial results acceptable"
+  ],
+  "created": "2025-10-20",
+  "updated": "2025-10-20",
+  "source": "CLAUDE.md (lines 426-760)"
+}

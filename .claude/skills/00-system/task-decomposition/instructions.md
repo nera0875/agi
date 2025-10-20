@@ -286,37 +286,232 @@ FORMAT: Return JSON exactly:
 "Get the top 80%, if timeout return what you have"
 ```
 
+## Part 3b: Scope ULTRA-PRÉCIS (Anti-Dérive)
+
+### The Problem: Scope Creep
+
+When prompt is vague, agent expands task beyond limits:
+
+```python
+# ❌ VAGUE SCOPE (agent spirals)
+Task(ask, "Analyze backend")
+→ Agent scans: services/
+→ Agent scans: api/
+→ Agent scans: routes/
+→ Agent scans: agents/
+→ Agent scans: models/
+→ Agent scans: tests/
+→ 10 minutes later: "I'm not done"
+
+# ✅ PRECISE SCOPE (agent focused)
+Task(ask, """
+Scan backend/services/memory*.py
+
+SCOPE:
+- Pattern: backend/services/memory*.py
+- Max 10 files
+- Stop at 10 files (ignore rest)
+- Ignore: __pycache__, *.pyc, test_*
+
+TASK: Extract classes + methods
+DEADLINE: 20s MAX
+""")
+→ Agent scans exactly 10 files
+→ Extracts exactly what asked
+→ Returns in 20 seconds
+```
+
+### Strategies for Ultra-Precise Scopes
+
+**Strategy 1: File Pattern (Alphabetic Partition)**
+```python
+# Bad: Too big
+"Scan backend/"
+→ Hundreds of files, agent overwhelmed
+
+# Good: Partitioned
+patterns = [
+    "backend/[a-d]*",   # Agent 1
+    "backend/[e-h]*",   # Agent 2
+    "backend/[i-l]*",   # Agent 3
+    "backend/[m-p]*",   # Agent 4
+    "backend/[q-z]*",   # Agent 5
+]
+→ Each agent: ~20 files, 20s
+```
+
+**Strategy 2: Component Partition (Semantic)**
+```python
+# Bad: All at once
+"Audit backend"
+
+# Good: By component
+Task(ask, "Scan backend/services/*.py")      # Agent 1
+Task(ask, "Scan backend/api/*.py")           # Agent 2
+Task(ask, "Scan backend/routes/*.py")        # Agent 3
+Task(ask, "Scan backend/agents/*.py")        # Agent 4
+Task(ask, "Find backend/**/*_wrapper.py")    # Agent 5
+→ Each agent: clear, focused component
+```
+
+**Strategy 3: Max Items (Sample if Too Big)**
+```python
+# Bad: Unbounded
+"Scan all services/"
+→ 100 files, 5 minute task
+
+# Good: Sample first N
+"""
+Scan backend/services/
+
+SCOPE:
+- Pattern: *.py
+- Max 20 files: take first 20 (stop at 20)
+- If more than 20 exist, sample strategy: alphabetical
+
+DEADLINE: 20s MAX
+"""
+→ Exactly 20 files, 20 seconds
+```
+
+### Example: Dividing Gros Travaux
+
+**Scenario: Audit entire backend (67 files)**
+
+```python
+# ❌ WRONG (1 agent, vague)
+Task(ask, "Audit backend/services/")
+→ Agent tries to scan 67 files
+→ 5+ minutes
+→ Bottleneck
+
+# ✅ RIGHT (5 agents, partitioned)
+# Estimate: 67 files / 5 agents = ~13-14 files each
+# Each agent: ~20 seconds
+
+patterns = [
+    "[a-d]",    # aaa_service.py, authentication.py, ...
+    "[e-h]",    # embedding.py, event_handler.py, ...
+    "[i-l]",    # index_service.py, ...
+    "[m-p]",    # memory_service.py, mcp_service.py, ...
+    "[q-z]",    # query_handler.py, retrieval.py, voyage_service.py, ...
+]
+
+for prefix in patterns:
+    Task(ask, f"""
+    Backend audit: {prefix} files
+
+    SCOPE:
+    - Pattern: backend/services/{prefix}*.py
+    - Max 20 files per agent
+    - Ignore: __pycache__, *.pyc, test_*
+
+    TASK:
+    1. List all classes (extract class names)
+    2. For each class, count public methods
+    3. Flag if >3 wrapper classes (code smell)
+    4. Flag if file >500 lines (too large)
+
+    DEADLINE: 20 seconds MAX
+    PARTIAL OK: Return files scanned so far
+
+    FORMAT JSON:
+    {{
+      "status": "complete|partial",
+      "prefix": "{prefix}",
+      "files_scanned": [...],
+      "classes": [...],
+      "issues": [...],
+      "completed_pct": 100
+    }}
+    """)
+
+# Result: 5 agents scan in PARALLEL
+# - Agent 1: 15 files in 20s
+# - Agent 2: 14 files in 20s
+# - Agent 3: 13 files in 20s
+# - Agent 4: 13 files in 20s
+# - Agent 5: 12 files in 20s
+# Total: 67 files in 20 seconds (not 5 minutes)
+
+# Aggregation:
+{
+    "total_files": 67,
+    "total_classes": 45,
+    "avg_methods_per_class": 3.2,
+    "issues": [
+        "memory_service.py: 520 lines (too large)",
+        "wrapper_*.py: 3 wrapper classes (code smell)"
+    ]
+}
+```
+
+### Quality Checklist: Scope Precision
+
+Before launching agents, verify:
+
+- [ ] Scope is specific (not vague: "backend" vs "backend/services/[a-d]*.py")?
+- [ ] Max items set (not unbounded: "max 20 files")?
+- [ ] Partitions don't overlap (each agent: unique scope)?
+- [ ] Load balanced (each agent: ~30s of work)?
+- [ ] Files are truly independent (can process in parallel)?
+- [ ] Clear exclusions stated ("ignore __pycache__")?
+- [ ] Pattern matches exactly what we want (test glob first)?
+
 ---
 
-## Part 4: Timeout & Partial Results
+## Part 4: Timeout & Partial Results (STRICT DEADLINES)
 
-### Setting Appropriate Deadlines
+### Setting Appropriate Deadlines (MANDATORY)
 
-**Duration by task type:**
+**CRITICAL RULE:** Every agent task MUST have `DEADLINE: X seconds MAX` in prompt.
 
-| Task Type | Deadline | Example |
-|-----------|----------|---------|
-| File scan | 15-20s | "Scan 20 files, extract classes" |
-| Data processing | 20-30s | "Parse logs, find errors" |
-| Implementation | 30-120s | "Write 1 endpoint or 1 component" |
-| Architecture | 30-60s | "Design system, list phases" |
-| Testing | 30-60s | "Run pytest, report results" |
+**Duration by task type (from production):**
 
-**Formula:**
+| Task Type | Deadline | Example | Note |
+|-----------|----------|---------|------|
+| **Scan 1-5 files** | 10s MAX | Extract classes from 1-5 .py | Fast |
+| **Scan 10-20 files** | 20s MAX | Scan services/, list functions | Sample if more |
+| **Scan 50+ files** | 5 × 20s | Partition a-e, f-j, k-o, p-t, u-z | Parallelize! |
+| **Grep pattern** | 15s MAX | Find "class.*X" in backend/ | Ripgrep fast |
+| **Health check 1 system** | 15s MAX | PostgreSQL: connections + queries | 1 DB check |
+| **Architecture design** | 30-60s | Multi-phase system plan | Requires thinking |
+| **Code 1 function** | 30s MAX | Backend endpoint or React hook | Focused |
+| **Code 1 API/mutation** | 60s MAX | Full endpoint implementation | Medium |
+| **Tests (single file)** | 20s MAX | pytest backend/tests/test_X.py | Quick |
+| **Documentation section** | 30s MAX | Update README section | Focused |
+| **Full feature (3+ parts)** | 2-3 min | Break into phases (backend + frontend + tests) | Parallelize |
+
+**Formula for custom deadlines:**
 ```
-Deadline = (Expected_Duration × 1.5) + 5s buffer
+Deadline = (Expected_Duration × 1.5) + 5s buffer (minimum 10s)
 ```
 
 Example:
 ```python
 # Task: Scan 20 files (normally 30s)
-expected = 30  # seconds
-deadline = (30 * 1.5) + 5
-        = 50 seconds
+expected = 30
+deadline = (30 * 1.5) + 5 = 50 seconds
 
-# Set deadline to 50s
-# Agent rushes, finishes in 40s
-# We wait 40s instead of potential 60s
+# Set DEADLINE: 50 seconds MAX
+# Agent feels pressure, finishes in 40s instead of 60s
+```
+
+**Real-world comparison:**
+```python
+# Without deadline (❌ SLOW)
+Task(ask, "Scan backend/services/")
+→ 5 minutes (agent perfectionism)
+
+# With deadline (✅ FAST)
+Task(ask, """
+Scan backend/services/
+
+DEADLINE: 20 seconds MAX
+PARTIAL OK: Return what you've scanned
+""")
+→ 20 seconds (agent rushes)
+→ Get 80% useful vs 100% in 5 min
 ```
 
 ### Handling Timeouts Gracefully
@@ -839,7 +1034,185 @@ Agent 3: "Scan 30 files" (1.5 min)
 
 ---
 
-**Version:** 1.0.0
+## Part 10: DEADLINE DISCIPLINE - Real World Examples (From CLAUDE.md)
+
+### Critical: Time Pressure = Efficiency
+
+Agents without deadlines take **5-10x longer** than agents with pressure.
+
+**Why? Agent perfectionism:**
+```
+Without deadline:
+- Agent: "I should be thorough"
+- Agent: "Let me check one more thing"
+- Agent: "Maybe look at edge cases"
+- Result: 5 minutes later, not done
+
+With deadline:
+- Agent: "I have 30 seconds"
+- Agent: "Scan TOP priority files"
+- Agent: "Return what I have"
+- Result: 30 seconds, 80% useful
+```
+
+### The 70% Rule (CEO Pragmatism)
+
+**Golden Rule:** 70% useful in 30s > 100% useful in 5 min
+
+```python
+# Compare two approaches:
+
+# Approach 1: Perfectionist
+Agent scans everything → 5 min
+Result: 100% complete
+Wait time: 5 min
+
+# Approach 2: Pragmatist CEO
+Agent has 30s deadline → 30 sec
+Result: 70% complete (enough to act)
+Wait time: 30 sec
+
+# Cost-benefit:
+Saved: 4.5 min waiting
+Value: 70% of information
+Decision: WORTH IT
+```
+
+### Concrete Example: Audit Project (10 agents, PARALLEL)
+
+**Scenario: "Check if backend health is OK"**
+
+#### ❌ OLD WAY (Sequential, No Deadlines)
+
+```python
+# 1 agent does everything
+Task(ask, "Audit backend completely")
+→ Agent scans services/: 2 min
+→ Agent scans api/: 1 min
+→ Agent scans routes/: 1 min
+→ Agent scans agents/: 1 min
+→ Agent writes report: 1 min
+
+Total: 6 minutes
+```
+
+#### ✅ NEW WAY (Parallel, DEADLINE-DRIVEN)
+
+```python
+# 10 agents, each with STRICT deadline
+
+# Phase 1: Scanning (parallel, 5 agents × 20s)
+Task(ask, """
+Backend services audit: A-E
+
+SCOPE:
+- Pattern: backend/services/[a-e]*.py
+- Max 15 files
+- Ignore: __pycache__, test_*
+
+TASK: Extract classes + method count
+
+DEADLINE: 20 seconds MAX
+PARTIAL OK: Return scanned files
+
+FORMAT: {status, files_scanned, classes, completed_pct}
+""")
+# Same for [f-j], [k-o], [p-t], [u-z]
+
+# Phase 2: API audit (parallel, 2 agents × 15s)
+Task(ask, "Scan backend/api/graphql/, list schema roots")  # 15s
+Task(ask, "Scan backend/routes/, list endpoints")           # 15s
+
+# Phase 3: Config scan (1 agent × 10s)
+Task(ask, "Check backend/core/ config, list settings")      # 10s
+
+# Phase 4: Aggregation (1 agent × 5s)
+→ Combine 8 agent results into single report              # 5s
+
+Total: 20 seconds (not 6 minutes!)
+Speedup: 18x faster
+
+Result: Same audit quality
+         18x faster execution
+```
+
+### Why DEADLINE is Mandatory
+
+**In prompt, ALWAYS include:**
+
+```python
+DEADLINE: [X] seconds MAX
+```
+
+**Examples:**
+
+```python
+# ✅ CORRECT (has deadline)
+Task(ask, """
+Scan backend/
+
+DEADLINE: 30 seconds MAX
+PARTIAL OK: Return what you scanned
+""")
+
+# ❌ WRONG (no deadline)
+Task(ask, "Scan backend/")
+→ Agent takes own time (slow)
+
+# ❌ WRONG (vague deadline)
+Task(ask, "Scan backend/", "Try to finish soon")
+→ "Soon" is not precise
+
+# ✅ BEST (precise deadline)
+Task(ask, """
+Scan backend/
+
+DEADLINE: 20 seconds MAX, PERIOD
+""")
+```
+
+### Anti-Patterns (CEO Lessons)
+
+| Pattern | Agent Behavior | Result | Fix |
+|---------|---|---|---|
+| **No deadline** | "Let me be thorough" | 5 min slow | `DEADLINE: 30s MAX` |
+| **Vague deadline** | "Try your best" | 3-4 min (still slow) | `DEADLINE: X seconds MAX, PERIOD` |
+| **Perfectionism language** | "Find everything" | Overthinks, 5 min | Use `PARTIAL OK: Return top 80%` |
+| **Single agent big task** | "Analyze whole backend" | 10 min bottleneck | Parallelize: 5 agents × 2 min |
+| **No partial results** | "All or nothing" | Fails if timeout | `completed_pct: 70% OK` |
+
+### The CEO Mindset Summary
+
+**Remember: You're a CEO managing 50 agents, not a solo worker.**
+
+**Entrepreneur principles:**
+1. **Parallelize ruthlessly** - If can split → split
+2. **Set deadlines** - Pressure = speed
+3. **Accept partial** - 70% in 30s > 100% in 5 min
+4. **Aggregate quickly** - Your job is orchestration, not execution
+5. **Delegate mastery** - Make agents faster, not you
+
+**Formula for success:**
+```
+Understand problem (10s)
+  ↓
+Break into micro-tasks (5s)
+  ↓
+Launch N agents in parallel (1s)
+  ↓
+Set STRICT deadlines (mandatory)
+  ↓
+Wait for results (20-60s)
+  ↓
+Aggregate + synthesize (10s)
+  ↓
+DONE (90s total vs 2-3 hours solo)
+```
+
+---
+
+**Version:** 2.0.0 (Updated with DEADLINE DISCIPLINE)
 **Last Updated:** 2025-10-20
-**Category:** System - Orchestration (Technical)
+**Category:** System - Orchestration (Technical + Production)
 **Maintenance:** Review when agent behavior changes
+**Key Skill:** DEADLINE discipline - core to CEO mindset

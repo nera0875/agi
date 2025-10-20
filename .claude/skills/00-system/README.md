@@ -65,6 +65,40 @@ Core system and management skills for AGI autonomous operation.
 
 ---
 
+### 3. Agent Orchestration (`agent-orchestration/`)
+
+**Pipeline 6 phases, 8 agents, orchestration workflow, MCPs**
+
+- **Files:**
+  - `README.md` - Overview and quick navigation
+  - `agent-orchestration.md` - Complete orchestration guide
+  - `examples.md` - Practical examples (audit, refactoring, features)
+  - `quick-reference.txt` - Cheat sheet and decision trees
+  - `.skill-meta.json` - Metadata and structure
+
+- **Key Topics:**
+  - 6-phase pipeline (Understanding→Research→Architecture→Implementation→Validation→Documentation)
+  - 8 agents (ask, research, architect, code, frontend, debug, docs, sre)
+  - Anti-Boomerang principle (sequential phases, parallel agents)
+  - Orchestration rules (MOI only invokes, agents never call agents)
+  - MCP configuration (research agent needs external tools)
+  - Task decomposition (precise prompts, strict deadlines)
+  - Token economy (89% savings via parallel execution)
+  - Practical patterns (audit, features, bug fixes, optimization)
+
+- **Use when:**
+  - Need to coordinate multiple agents in parallel
+  - Large codebase exploration/refactoring
+  - Feature implementation (full-stack)
+  - Performance optimization or debugging
+  - Documentation generation
+  - Infrastructure monitoring
+
+- **Total content:** ~30KB across 5 files
+- **Status:** Complete and documented
+
+---
+
 ## Quick Reference
 
 ### When to Use Which Skill?
@@ -77,6 +111,10 @@ Core system and management skills for AGI autonomous operation.
 | "Large task, need speed" | CEO Mindset | Parallel delegation |
 | "Need to audit 50 files" | CEO Mindset | Decompose + agents |
 | "Implement feature fast" | CEO Mindset | 6-phase workflow |
+| "Orchestrate multiple agents" | Agent Orchestration | Pipeline phases + agents |
+| "Full-stack feature" | Agent Orchestration | Parallel code + frontend |
+| "Performance optimization" | Agent Orchestration | Multi-phase investigation |
+| "Urgent bug fix" | Agent Orchestration | Skip phases, direct to code |
 
 ---
 
@@ -88,9 +126,15 @@ Core system and management skills for AGI autonomous operation.
 ├── agi-memory-management/
 │   ├── README.md
 │   └── instructions.md
-└── ceo-mindset/
+├── ceo-mindset/
+│   ├── README.md
+│   └── instructions.md
+└── agent-orchestration/
     ├── README.md
-    └── instructions.md
+    ├── agent-orchestration.md
+    ├── examples.md
+    ├── quick-reference.txt
+    └── .skill-meta.json
 ```
 
 ---
@@ -111,12 +155,20 @@ System skills inform how Claude Code (you) work:
    - Use Task() to delegate to agents
    - Aggregate results intelligently
 
+3. **Agent Orchestration** - HOW to coordinate agents at scale
+   - Use 6-phase pipeline for complex features
+   - Launch multiple agents in parallel (×10-20)
+   - Aggregate JSON results into actionable insights
+   - Follow Anti-Boomerang principle (MOI only orchestrates)
+
 ### With Other Skills
 
 - **Project Structure** (04-architecture) - WHERE code goes
 - **Workflow Implementation** (06-workflow) - DETAILED execution
 - **Agent Collaboration** (06-workflow) - HOW agents coordinate
 - **Architecture Thinking** (04-architecture) - WHEN to use memory/agents
+- **Task Decomposition** (system) - HOW to break down complex work
+- **Token Optimization** (system) - EFFICIENCY of parallel agents
 
 ---
 
@@ -145,6 +197,29 @@ Neurotransmitters: LTP (strengthen), LTD (weaken)
 6. DOCUMENTATION (single) - docs agent
 ```
 
+### Agent Orchestration Pipeline
+
+```
+PHASE 1: UNDERSTANDING (ask)
+  ↓ [parallel: 1-10 agents, 20s timeout]
+PHASE 2: RESEARCH (research)
+  ↓ [parallel: 1-5 agents, 15s each]
+PHASE 3: ARCHITECTURE (architect)
+  ↓ [single: 1 agent, 30s]
+PHASE 4: IMPLEMENTATION (code + frontend)
+  ↓ [parallel: 1-10 agents, 30-60s]
+PHASE 5: VALIDATION (debug)
+  ↓ [parallel: 2-3 agents, 20-30s]
+PHASE 6: DOCUMENTATION (docs)
+  ↓ [single: 1 agent, 30s]
+
+Rules:
+- Phases sequential (strict order)
+- Agents parallel (independent execution)
+- MOI only orchestrates
+- Agents never call agents
+```
+
 ---
 
 ## Performance Metrics
@@ -159,6 +234,12 @@ Neurotransmitters: LTP (strengthen), LTD (weaken)
 - Solo approach: 5,000-10,000 tokens, 3-5 minutes
 - CEO approach: 3,400 tokens, 1-2 minutes
 - Speedup: 3-5x faster, 66% token savings
+
+### Agent Orchestration Pipeline
+- Audit backend: 20s (parallel) vs 5min (solo) = 15x speedup
+- Feature implementation: 2h (pipeline) vs 3h (solo) = 33% faster
+- Bug fix: 10min (minimal pipeline) vs 30min (debug solo) = 3x faster
+- Token economy: 3,400 tokens (agent isolated) vs 30,000 tokens (solo) = 89% savings
 
 ---
 

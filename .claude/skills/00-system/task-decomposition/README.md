@@ -344,51 +344,182 @@ Task(debug, "E2E test")
 
 ## Timeout Management
 
-### Rule 1: Always Set Deadline
+### Rule 1: DEADLINES ARE STRICT (CEO Discipline)
 
-Agents without deadlines take as long as they want (slow).
+Agents work 10-20x faster with hard time pressure. **70% useful results in 30s beats 100% in 5 minutes.**
 
 ```python
-# ❌ No deadline
+# ❌ WRONG (agent takes own time)
 Task(ask, "Scan backend/")
+→ 5 minutes, agent perfectionism
 
-# ✅ Has deadline
-Task(ask, "Scan backend/", timeout=30)
-```
+# ✅ CORRECT (hard deadline)
+Task(ask, """
+Scan backend/
 
-### Rule 2: Accept Partial Results
-
-70% complete in 30s is better than 100% complete in 5 minutes.
-
-```python
-# Mark in prompt:
-"""
 DEADLINE: 30 seconds MAX
-PARTIAL OK: If timeout, return what you have
-"""
-
-# Handle in aggregation:
-for result in results:
-    if result.get("timeout"):
-        if result.get("completed", 0) > 70:
-            usable_results.append(result)  # Good enough
-        else:
-            failed_results.append(result)   # Too incomplete
+PARTIAL OK: Return what you have if timeout
+""")
+→ 30 seconds, 80% useful
 ```
 
-### Rule 3: Retry Failed Tasks Smartly
+**Golden Rule:** `DEADLINE` field is MANDATORY in every prompt.
 
-If agent timeout, retry with smaller scope:
+### Rule 2: Timeouts by Task Type (Reference Table)
+
+**Strict deadlines - ALWAYS include in prompts:**
+
+| Task Type | Timeout | Example | Notes |
+|-----------|---------|---------|-------|
+| **Scan 1-5 files** | 10s MAX | Extract classes from 1-5 .py files | Fast glob + read |
+| **Scan 10-20 files** | 20s MAX | Scan services/, list functions | Sample if more |
+| **Scan 50+ files** | 5 agents × 20s | Partition by prefix (a-z) | Parallelize! |
+| **Grep pattern** | 15s MAX | Find all "class.*X" in backend/ | Ripgrep = quick |
+| **Health check 1 system** | 15s MAX | PostgreSQL connections + queries | 1 DB check |
+| **Architecture design** | 30-60s | Plan multi-phase system | Requires thinking |
+| **Code 1 function** | 30s MAX | Backend endpoint or React hook | Focused scope |
+| **Code 1 API/mutation** | 60s MAX | Full endpoint implementation | Medium complexity |
+| **Run tests (single file)** | 20s MAX | pytest backend/tests/test_X.py | Quick validation |
+| **Documentation section** | 30s MAX | Update README section | Focused writing |
+| **Full feature (3+ parts)** | 2-3 min | Backend + Frontend + Migrations | Break into phases |
+
+**Formula for custom deadlines:**
+```
+Deadline = (Expected_Duration × 1.5) + 5s buffer (minimum 10s)
+```
+
+Example:
+```python
+# Task expected to take 30s
+deadline = (30 * 1.5) + 5 = 50 seconds
+
+# Agent feels pressure, finishes in 40s vs 60s
+```
+
+### Rule 3: Format Prompt Standard (MANDATORY)
+
+**EVERY task to agents MUST include:**
 
 ```python
-# Attempt 1: Big scope, timeout
-result = Task(ask, "Scan backend/services/", timeout=20)
+Task(agent_type, """
+[1-2 sentences: CONTEXT]
+What is this task part of?
 
-if result.get("timeout"):
-    # Attempt 2: Smaller scope
-    result1 = Task(ask, "Scan backend/services/[a-m]*.py", timeout=20)
-    result2 = Task(ask, "Scan backend/services/[n-z]*.py", timeout=20)
-    result = merge(result1, result2)
+SCOPE:
+- Files/data: [EXACTLY what to process]
+- Max items: [If >N, sample first N]
+- Ignore: [What to skip]
+
+TASK:
+1. [Action 1]
+2. [Action 2]
+3. [Action 3]
+
+DEADLINE: [X] seconds MAX
+PARTIAL OK: If timeout, return what you have
+
+FORMAT: Return JSON exactly:
+{
+  "status": "complete|partial|timeout",
+  "completed_pct": 100,
+  ...
+}
+""")
+```
+
+**Required fields:**
+- ✅ `DEADLINE: X seconds MAX`
+- ✅ `PARTIAL OK:` clause
+- ✅ `FORMAT: JSON` specification
+- ✅ Clear `SCOPE:` boundaries
+
+### Rule 4: Accept Partial Results (70% Rule)
+
+Incomplete results are ACCEPTABLE if >70% complete.
+
+```python
+# ✅ GOOD (75% complete)
+{
+  "status": "partial",
+  "completed_pct": 75,
+  "files": 3,
+  "result": [...]
+}
+→ Accept this, meets 70% threshold
+
+# ❌ BAD (40% complete)
+{
+  "status": "timeout",
+  "completed_pct": 40,
+  "result": [...]
+}
+→ Reject, below 70% threshold
+```
+
+**In aggregation:**
+```python
+results = [
+    {"status": "complete", "items": 10},    # 100% ✅
+    {"status": "partial", "completed_pct": 80, "items": 7},   # 80% ✅
+    {"status": "timeout", "completed_pct": 40, "items": 2},   # 40% ❌
+]
+
+# Filter: Keep >70%
+good_results = [r for r in results
+               if r.get("completed_pct", 100) >= 70]
+
+# Success if ≥70% of agents succeed
+success_rate = len(good_results) / len(results)
+if success_rate >= 0.7:
+    aggregate(good_results)  # GO
+else:
+    retry_with_smaller_scope()  # Retry
+```
+
+### Rule 5: Retry Strategy (Smart Fallback)
+
+**Attempt 1: Big scope, short deadline**
+```python
+result = Task(ask, "Scan backend/services/", timeout=20)
+```
+
+**If timeout < 70%:**
+```python
+# Attempt 2: Split into smaller partitions
+result1 = Task(ask, "Scan backend/services/[a-m]*.py", timeout=20)
+result2 = Task(ask, "Scan backend/services/[n-z]*.py", timeout=20)
+final = merge(result1, result2)
+
+# Total time: 20s original + 20s retry = 40s
+# vs forcing one agent to work forever
+```
+
+### Rule 6: Real-World Timeout Discipline
+
+**Anti-patterns to AVOID:**
+
+| Anti-Pattern | Result | Fix |
+|--------------|--------|-----|
+| No deadline | 5-10 min (agent perfectionism) | Set `DEADLINE: 30s MAX` |
+| Vague scope | Agent confused, overthinks | Be ultra-precise: "files: services/*.py" |
+| Perfectionism pressure | "Find everything" | Accept partial: "PARTIAL OK" |
+| Single agent big task | 5 min slow | Parallelize: 5 agents × 1 min |
+| No partial results | All-or-nothing failure | `completed_pct: 70%` OK |
+
+**Pragmatism wins:**
+```python
+# ❌ WRONG (perfectionist)
+"Analyze thoroughly, find everything"
+→ Agent takes 5 minutes
+→ We wait 5 minutes
+
+# ✅ RIGHT (pragmatist CEO)
+"""
+DEADLINE: 30s MAX
+PARTIAL OK: Return top 80%, stop if timeout
+"""
+→ Agent rushes, finishes in 30s
+→ We get 80% useful in 30s instead of 100% in 5 min
 ```
 
 ## Aggregation Strategy

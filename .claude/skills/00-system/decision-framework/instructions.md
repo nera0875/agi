@@ -843,7 +843,144 @@ Phase 5: Task(debug, "Write test + validate fix")
 
 ---
 
-## Part 9: Quick Reference Card
+## Part 9: Agent Strategy (Pre-Tasking)
+
+**BEFORE launching agents: Strategic thinking phase (CEO job)**
+
+### Step 1: Decode Request
+
+**Transform user intent:**
+```
+❌ User says: "Check memory service"
+✅ CEO decodes: "Understand current implementation → find optimizations → document"
+
+Actions:
+1. What's the GOAL? (audit, implement, fix, learn)
+2. What CONSTRAINTS? (time, scope, dependencies)
+3. What OUTCOMES needed? (report, code, decision)
+```
+
+### Step 2: Decompose into Micro-Tasks
+
+**Break big task into independent units:**
+
+```python
+# ❌ MONOLITHIC:
+Task(ask, "Audit entire backend")
+→ 1 agent, 5 min, blocks everything
+
+# ✅ DECOMPOSED:
+Task(ask, "Scan services/ → list classes")
+Task(ask, "Scan api/ → list endpoints")
+Task(ask, "Find duplicates in backends/")
+Task(ask, "Check test coverage")
+→ 4 agents, 20s total (parallel)
+```
+
+**Key principle:** Each task = **1 agent, 20-30s, clear scope**
+
+### Step 3: Identify Resources & Dependencies
+
+**Resource mapping:**
+```python
+# What exists?
+files = find_files(pattern)
+dependencies = analyze_imports()
+hotspots = identify_slow_queries()
+
+# What's independent?
+task_a = "Scan services/ (read-only)"
+task_b = "Scan api/ (read-only)"
+→ NO dependency → Parallel ✅
+
+# What depends on prior result?
+task_1 = "Understand existing code"
+task_2 = "Design improvements (needs task_1)"
+→ Dependency → Sequential ⏱️
+```
+
+### Step 4: Parallelize Intelligently
+
+**Rule: Maximize parallelization, minimize sync points**
+
+```python
+# ❌ SERIAL (slow):
+for file in 100_files:
+    Task(ask, f"Analyze {file}")  # Sequential
+
+# ✅ PARALLEL (10x faster):
+# Divide into 5 batches (20 files each)
+Task(ask, "Files [a-d]")      # Agent 1
+Task(ask, "Files [e-h]")      # Agent 2
+Task(ask, "Files [i-l]")      # Agent 3
+Task(ask, "Files [m-p]")      # Agent 4
+Task(ask, "Files [q-z]")      # Agent 5
+# All run simultaneously = 5x speedup
+
+# Adaptive agents count:
+files_count = 100
+agents = min(20, max(1, files_count // 20))  # 5 agents
+```
+
+**Read-only operations (ask, research): Can parallel aggressively (20+ agents)**
+
+**Write operations (code): MUST serialize (1 file = 1 agent at a time)**
+
+### Step 5: Launch & Aggregate
+
+**Never fire-and-forget. CEO orchestrates:**
+
+```python
+# Phase 1: Fire all agents
+tasks = [
+    Task(ask, "Scan services/memory*.py"),
+    Task(ask, "Scan services/graph*.py"),
+    Task(ask, "Scan api/"),
+]
+
+# Phase 2: Aggregate results
+results = [task.result for task in tasks]  # Wait for all
+
+# Phase 3: CEO makes decision
+aggregated = {
+    "memory_service": results[0],
+    "graph_service": results[1],
+    "api_structure": results[2],
+}
+
+# Phase 4: Next phase decision
+if results[0]["status"] == "needs_refactoring":
+    # Launch refactoring phase
+    Task(code, f"Refactor based on: {aggregated}")
+```
+
+### Token Economy: 80% Savings via Parallelization
+
+**WITHOUT agents (MOI does all):**
+```
+MOI reads 10 files → 5,000 tokens
+MOI analyzes patterns → 3,000 tokens
+MOI designs → 2,000 tokens
+MOI codes → 4,000 tokens
+MOI aggregates → 1,000 tokens
+Total: 15,000 tokens (+ time)
+```
+
+**WITH agents (strategic CEO):**
+```
+CEO: Decompose + think → 200 tokens
+10 agents (parallel, isolated):
+  - Each agent: 300-500 tokens (conversation isolated)
+  - Total: 5,000 tokens (10x cheaper than MOI)
+CEO: Aggregate + decide → 300 tokens
+Total: 5,500 tokens (64% savings!)
+```
+
+**Why?** Agent conversations are ISOLATED from main context → cheaper tokens
+
+---
+
+## Part 10: Quick Reference Card
 
 **Use this when speed matters:**
 
@@ -864,7 +1001,8 @@ User says:          → Agent(s)           → Phases
 
 ---
 
-**Version:** 1.0.0
+**Version:** 1.1.0
 **Last Updated:** 2025-10-20
 **Category:** System - Decision Making
+**Changes:** Added Part 9 (Agent Strategy + Token Economy)
 **Maintenance:** Review monthly for new patterns
