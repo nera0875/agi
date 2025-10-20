@@ -1,0 +1,177 @@
+{
+  "version": "2.0",
+  "project": "AGI Memory System",
+  "timestamp": "2025-10-20",
+  "description": "Official Claude Code configuration for AGI project",
+  "defaultSkills": [
+    "00-system/agi-memory-management",
+    "00-system/ceo-mindset",
+    "00-system/agent-orchestration",
+    "00-system/workflow-bootstrap",
+    "00-system/interdictions",
+    "00-system/decision-framework",
+    "00-system/task-decomposition",
+    "00-system/memory-strategy",
+    "00-system/token-optimization",
+    "00-system/cascade-automation"
+  ],
+  "permissions": {
+    "rules": [
+      {"type": "deny", "pattern": ".env*", "reason": "Protect API keys"},
+      {"type": "deny", "pattern": "secrets/**", "reason": "Secrets directory"},
+      {"type": "deny", "pattern": "**/*password*", "reason": "Password files"},
+      {"type": "deny", "pattern": "**/*.key", "reason": "Private key files"},
+      {"type": "allow", "pattern": "Read:**"},
+      {"type": "allow", "pattern": "Glob:**"},
+      {"type": "allow", "pattern": "Grep:**"},
+      {"type": "allow", "pattern": "Bash:git *"},
+      {"type": "allow", "pattern": "Bash:python *"},
+      {"type": "allow", "pattern": "Bash:pytest *"},
+      {"type": "ask", "pattern": "Bash:rm *"},
+      {"type": "ask", "pattern": "Bash:mv *"},
+      {"type": "ask", "pattern": "Edit:.claude/**"}
+    ]
+  },
+  "hooks": {
+    "user-prompt-submit": [
+      {
+        "type": "command",
+        "command": "python3 /home/pilote/projet/agi/cortex/hooks/capture_user_message.py \"$CLAUDE_USER_PROMPT\""
+      }
+    ],
+    "post-tool-use": [
+      {
+        "name": "exa-learning",
+        "matcher": "mcp__exa__web_search_exa",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 /home/pilote/projet/agi/cortex/hooks/store_tool_learning.py \"exa\" '$TOOL_RESULT'"
+          }
+        ]
+      },
+      {
+        "name": "context7-learning",
+        "matcher": "mcp__upstash-context-7-mcp__get-library-docs",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 /home/pilote/projet/agi/cortex/hooks/store_tool_learning.py \"context7\" '$TOOL_RESULT'"
+          }
+        ]
+      },
+      {
+        "name": "database-learning",
+        "matcher": "mcp__agi-tools__database",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 /home/pilote/projet/agi/cortex/hooks/store_tool_learning.py \"database\" '$TOOL_RESULT'"
+          }
+        ]
+      },
+      {
+        "name": "memory-learning",
+        "matcher": "mcp__agi-tools__memory",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 /home/pilote/projet/agi/cortex/hooks/store_tool_learning.py \"memory\" '$TOOL_RESULT'"
+          }
+        ]
+      },
+      {
+        "name": "python-formatting",
+        "matcher": "Edit:backend/**/*.py|Write:backend/**/*.py",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd /home/pilote/projet/agi && black backend/ --quiet 2>/dev/null || true"
+          },
+          {
+            "type": "command",
+            "command": "cd /home/pilote/projet/agi && isort backend/ --quiet 2>/dev/null || true"
+          }
+        ]
+      },
+      {
+        "name": "schema-validation",
+        "matcher": "Edit:backend/api/schema.py",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd /home/pilote/projet/agi && pytest backend/tests/api/ -q --timeout=10 2>/dev/null || true"
+          }
+        ]
+      },
+      {
+        "name": "auto-trigger-agents",
+        "matcher": "Edit:backend/**/*|Write:backend/**/*|Edit:cortex/**/*|Write:cortex/**/*|Edit:CLAUDE.md|Write:CLAUDE.md|Edit:frontend/src/**|Write:frontend/src/**",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 /home/pilote/projet/agi/.claude/hooks/auto_trigger_agent.py",
+            "timeout": 2
+          }
+        ]
+      }
+    ],
+    "pre-compact": [
+      {
+        "type": "command",
+        "command": "python3 /home/pilote/projet/agi/cortex/hooks/consolidate_conversation.py '$CONVERSATION'"
+      },
+      {
+        "type": "command",
+        "command": "python3 /home/pilote/projet/agi/.claude/hooks/learn_hook.py",
+        "timeout": 5,
+        "name": "learn-patterns"
+      }
+    ]
+  },
+  "agentConfig": {
+    "defaultTimeout": 30,
+    "maxParallel": 20,
+    "deadlineScaling": {
+      "ask": 20,
+      "research": 30,
+      "architect": 30,
+      "code": 30,
+      "frontend": 30,
+      "debug": 20,
+      "docs": 20,
+      "sre": 15
+    }
+  },
+  "toolDefaults": {
+    "bash": {
+      "timeout": 120000,
+      "cwd": "/home/pilote/projet/agi"
+    },
+    "read": {
+      "maxLines": 2000
+    }
+  },
+  "projectPaths": {
+    "root": "/home/pilote/projet/agi",
+    "backend": "/home/pilote/projet/agi/backend",
+    "frontend": "/home/pilote/projet/agi/frontend",
+    "cortex": "/home/pilote/projet/agi/cortex",
+    "agents": "/home/pilote/projet/agi/agents",
+    "tests": "/home/pilote/projet/agi/backend/tests"
+  },
+  "standards": {
+    "python": {
+      "formatter": "black",
+      "linter": "ruff",
+      "typeChecker": "mypy",
+      "testRunner": "pytest"
+    },
+    "frontend": {
+      "formatter": "prettier",
+      "linter": "eslint",
+      "typeChecker": "typescript",
+      "testRunner": "vitest"
+    }
+  }
+}

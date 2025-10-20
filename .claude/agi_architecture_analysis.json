@@ -1,0 +1,798 @@
+{
+  "metadata": {
+    "project": "AGI - Autonomous Brain with Memory System",
+    "analysis_date": "2025-10-19",
+    "total_size_gb": 1.25,
+    "python_files": 113,
+    "python_loc": 36774,
+    "typescript_files": 112,
+    "typescript_loc": 19044
+  },
+  
+  "structure": {
+    "directories": [
+      {
+        "path": "backend/",
+        "size_mb": 1.8,
+        "purpose": "FastAPI application with GraphQL, memory services, agents",
+        "key_subdirs": ["services", "agents", "api", "routes", "config", "core"],
+        "status": "production"
+      },
+      {
+        "path": "cortex/",
+        "size_mb": 0.8,
+        "purpose": "Agent orchestration, MCP integration, daemon processes",
+        "key_subdirs": ["daemon", "hooks", "workers", "memory"],
+        "status": "active_development"
+      },
+      {
+        "path": "frontend/",
+        "size_mb": 345,
+        "purpose": "React + TypeScript UI with Tailwind CSS",
+        "key_subdirs": ["src/components", "src/lib", "src/hooks", "src/graphql"],
+        "status": "production",
+        "note": "Large size mostly due to node_modules"
+      },
+      {
+        "path": "mcp_servers/",
+        "size_mb": 320,
+        "purpose": "External MCP integrations (Exa, Fetch, Context7)",
+        "key_subdirs": ["exa-mcp-server", "fetch-mcp", "context7"],
+        "status": "external_dependencies"
+      }
+    ],
+    "organization_score": "6/10",
+    "organization_notes": "Functional but needs optimization. Some redundancy in memory/search services, loose test files in backend root."
+  },
+  
+  "services": {
+    "critical": [
+      {
+        "name": "MemoryService",
+        "lines": 1084,
+        "purpose": "Hybrid RAG with semantic + BM25 search, Voyage AI embeddings, Cohere reranking",
+        "dependencies": ["voyage_embeddings", "cohere_rerank", "neo4j_memory", "redis"],
+        "criticality": "CRITICAL - Core memory system",
+        "issues": "Very large file, handles too many concerns (caching, search, reranking)"
+      },
+      {
+        "name": "Neo4jMemoryService",
+        "lines": 949,
+        "purpose": "Graph-based memory with LTP/LTD, spreading activation, pattern detection",
+        "dependencies": ["neo4j_driver", "neural_memory"],
+        "criticality": "CRITICAL - Graph knowledge system",
+        "issues": "Large file, handles both data and algorithm logic"
+      },
+      {
+        "name": "HybridSearchService",
+        "lines": 697,
+        "purpose": "Multi-source search fusion (BM25, semantic, graph)",
+        "dependencies": ["voyage", "cohere", "neo4j"],
+        "criticality": "CRITICAL - Search coordination",
+        "issues": "Overlaps with MemoryService functionality"
+      },
+      {
+        "name": "L1Observer Agent",
+        "lines": 2500,
+        "purpose": "LangGraph-based event processing pipeline",
+        "dependencies": ["langgraph", "memory_service", "mcp_integration"],
+        "criticality": "CRITICAL - Main event loop",
+        "status": "Well-structured with separate nodes",
+        "children": ["classify_event (358 lines)", "assess_importance (371 lines)", "store_memory (702 lines)", "enrich_context (262 lines)", "decide_storage_layer (245 lines)"]
+      }
+    ],
+    
+    "optimization": [
+      {
+        "name": "NeuralMemoryService",
+        "lines": 629,
+        "purpose": "Neural pathways, synaptic weights, consolidation",
+        "issue": "Separate from memory_service, potential duplication"
+      },
+      {
+        "name": "RedisMemoryService",
+        "lines": 349,
+        "purpose": "Redis caching layer",
+        "issue": "Cache logic mixed in MemoryService, not properly abstracted"
+      },
+      {
+        "name": "VoyageEmbeddingService",
+        "lines": 478,
+        "purpose": "Voyage AI wrapper",
+        "issue": "Both service and wrapper (voyage_wrapper.py 336 lines), duplicated logic"
+      },
+      {
+        "name": "CohereRerankService",
+        "lines": 457,
+        "purpose": "Cohere reranking",
+        "issue": "Both service and wrapper (cohere_wrapper.py), duplicated logic"
+      }
+    ],
+    
+    "memory": [
+      {
+        "name": "VoyageEmbeddingService + VoyageWrapper",
+        "lines": 814,
+        "problem": "DUPLICATE - Both have similar embedding logic"
+      },
+      {
+        "name": "CohereRerankService + CohereWrapper",
+        "lines": 914,
+        "problem": "DUPLICATE - Both have similar reranking logic"
+      },
+      {
+        "name": "MemoryService vs HybridSearchService",
+        "lines": 1781,
+        "problem": "OVERLAP - Search logic split across two services"
+      },
+      {
+        "name": "GraphService + Neo4jMemoryService",
+        "lines": 1429,
+        "problem": "PARTIAL OVERLAP - Graph operations duplicated"
+      }
+    ],
+    
+    "misc": [
+      {
+        "name": "AgentService",
+        "lines": 599,
+        "purpose": "Agent orchestration"
+      },
+      {
+        "name": "SearchService (BM25)",
+        "lines": 387,
+        "purpose": "PostgreSQL full-text search"
+      },
+      {
+        "name": "StoreMemoryService",
+        "lines": 603,
+        "purpose": "Memory persistence logic"
+      },
+      {
+        "name": "ContainerService",
+        "lines": 200,
+        "purpose": "Time blocking containers management"
+      },
+      {
+        "name": "NeurotransmitterSystem",
+        "lines": 333,
+        "purpose": "Neurotransmitter-based memory activation"
+      },
+      {
+        "name": "HumanBrain",
+        "lines": 342,
+        "purpose": "Brain-inspired memory consolidation"
+      }
+    ]
+  },
+  
+  "agents": {
+    "current_agents": [
+      {
+        "name": "L1Observer",
+        "type": "Event-driven",
+        "status": "Fully implemented",
+        "structure": "LangGraph StateGraph with 6-node pipeline",
+        "nodes": [
+          "classify_event (event categorization)",
+          "assess_importance (priority scoring)",
+          "enrich_context (MCP integration)",
+          "decide_storage_layer (memory selection)",
+          "store_memory (persistence)",
+          "routing logic (conditional branching)"
+        ],
+        "strengths": ["Well-structured", "Checkpointing support", "Clear separation of concerns"],
+        "issues": ["Large store_memory node (702 lines)"]
+      },
+      {
+        "name": "FrontendManager",
+        "type": "Event-driven",
+        "status": "Implemented",
+        "lines": 745,
+        "purpose": "React component generation from memory",
+        "issues": ["Very large, should be modularized"]
+      },
+      {
+        "name": "Consolidator",
+        "type": "Scheduled (1h)",
+        "status": "TODO - Not implemented",
+        "lines": 0,
+        "purpose": "LTP/LTD consolidation"
+      },
+      {
+        "name": "Validator",
+        "type": "Event-driven",
+        "status": "TODO - Not implemented",
+        "lines": 0,
+        "purpose": "Memory contradiction detection"
+      }
+    ],
+    
+    "agent_infrastructure": [
+      {
+        "component": "BaseAgent",
+        "lines": 60,
+        "purpose": "Abstract base class for all agents",
+        "status": "Good foundation"
+      },
+      {
+        "component": "Orchestrator (daemon/orchestrator.py)",
+        "lines": 117,
+        "purpose": "Agent scheduling and health monitoring",
+        "status": "Functional but basic"
+      },
+      {
+        "component": "AgentService",
+        "lines": 599,
+        "purpose": "High-level agent management",
+        "status": "Connects to backend"
+      },
+      {
+        "component": "L1 Checkpointing",
+        "lines": 613,
+        "purpose": "LangGraph state persistence",
+        "status": "Supports both memory and PostgreSQL"
+      }
+    ],
+    
+    "missing_agents": [
+      {
+        "name": "Consolidator",
+        "schedule": "1h",
+        "responsibility": "LTP/LTD consolidation from L1 events",
+        "estimated_lines": 300,
+        "priority": "HIGH"
+      },
+      {
+        "name": "Validator",
+        "schedule": "Event-driven",
+        "responsibility": "Check memory contradictions, temporal consistency",
+        "estimated_lines": 250,
+        "priority": "MEDIUM"
+      },
+      {
+        "name": "PatternExtractor",
+        "schedule": "6h",
+        "responsibility": "Detect insights and patterns from memories",
+        "estimated_lines": 400,
+        "priority": "MEDIUM"
+      },
+      {
+        "name": "GraphOptimizer",
+        "schedule": "12h",
+        "responsibility": "Neo4j relationship optimization, prune weak links",
+        "estimated_lines": 350,
+        "priority": "LOW"
+      },
+      {
+        "name": "EmbeddingUpdater",
+        "schedule": "Daily",
+        "responsibility": "Update embeddings for changed memories",
+        "estimated_lines": 250,
+        "priority": "MEDIUM"
+      }
+    ]
+  },
+  
+  "issues": {
+    "large_files_candidates": [
+      {
+        "file": "backend/services/memory_service.py",
+        "lines": 1084,
+        "recommendation": "Split into: search_orchestrator.py, cache_manager.py, reranking.py",
+        "severity": "HIGH"
+      },
+      {
+        "file": "backend/services/neo4j_memory.py",
+        "lines": 949,
+        "recommendation": "Split into: graph_data.py, graph_algorithms.py, spreading_activation.py",
+        "severity": "HIGH"
+      },
+      {
+        "file": "backend/services/hybrid_search.py",
+        "lines": 697,
+        "recommendation": "Merge into memory_service or make it coordinator only",
+        "severity": "HIGH"
+      },
+      {
+        "file": "cortex/agi_tools_mcp.py",
+        "lines": 2954,
+        "recommendation": "Split by tool type: memory_tools.py, db_tools.py, agent_tools.py, mcp_tools.py",
+        "severity": "CRITICAL"
+      },
+      {
+        "file": "backend/agents/frontend_manager.py",
+        "lines": 745,
+        "recommendation": "Split into: component_generator.py, schema_analyzer.py, react_builder.py",
+        "severity": "MEDIUM"
+      },
+      {
+        "file": "backend/api/schema.py",
+        "lines": 1611,
+        "recommendation": "Split into schema/ directory with multiple files by domain",
+        "severity": "MEDIUM"
+      },
+      {
+        "file": "cortex/mcp_router.py",
+        "lines": 777,
+        "recommendation": "Split into: mcp_client.py, mcp_executor.py, mcp_cache.py",
+        "severity": "MEDIUM"
+      },
+      {
+        "file": "cortex/worker_pool.py",
+        "lines": 596,
+        "recommendation": "Split into: pool_manager.py, task_executor.py, result_aggregator.py",
+        "severity": "MEDIUM"
+      }
+    ],
+    
+    "redundancies": [
+      {
+        "type": "Embedding wrappers",
+        "files": ["voyage_embeddings.py (478 lines)", "voyage_wrapper.py (336 lines)"],
+        "problem": "Duplicate logic for Voyage AI integration",
+        "solution": "Keep one source of truth, remove wrapper"
+      },
+      {
+        "type": "Reranking wrappers",
+        "files": ["cohere_rerank.py (457 lines)", "cohere_wrapper.py (336 lines)"],
+        "problem": "Duplicate logic for Cohere integration",
+        "solution": "Keep one source of truth, remove wrapper"
+      },
+      {
+        "type": "Search services",
+        "files": ["memory_service.py", "hybrid_search.py", "search_service.py"],
+        "problem": "Search orchestration split across 3 services",
+        "solution": "Single SearchOrchestrator, split search algorithms by type"
+      },
+      {
+        "type": "Graph operations",
+        "files": ["graph_service.py", "neo4j_memory.py"],
+        "problem": "Graph CRUD and algorithms mixed",
+        "solution": "graph_service.py handles CRUD, algorithms in specialized modules"
+      },
+      {
+        "type": "Memory store logic",
+        "files": ["memory_service.py", "store_memory.py", "neural_memory.py"],
+        "problem": "Storage logic scattered across services",
+        "solution": "Unified StorageOrchestrator"
+      }
+    ],
+    
+    "missing_organization": [
+      {
+        "area": "No utils module",
+        "examples": ["date utilities", "validation helpers", "formatting functions"],
+        "impact": "MEDIUM - Code reuse difficult"
+      },
+      {
+        "area": "No constants module",
+        "examples": ["Magic numbers in algorithms", "Hardcoded thresholds"],
+        "impact": "LOW - Scattered but documented"
+      },
+      {
+        "area": "Test files in root",
+        "files": ["backend/test_*.py"],
+        "impact": "LOW - Should be in tests/ directory"
+      },
+      {
+        "area": "No middleware organization",
+        "issue": "Observability scattered in core/",
+        "solution": "Create middleware/ directory"
+      },
+      {
+        "area": "Models/types scattered",
+        "issue": "Dataclasses in multiple services",
+        "solution": "Create models/ directory for unified domain models"
+      }
+    ],
+    
+    "missing_features": [
+      {
+        "feature": "Consolidator Agent",
+        "status": "TODO",
+        "lines_needed": 300,
+        "criticality": "HIGH",
+        "description": "LTP/LTD consolidation - referenced in README but not implemented"
+      },
+      {
+        "feature": "Validator Agent",
+        "status": "TODO",
+        "lines_needed": 250,
+        "criticality": "MEDIUM",
+        "description": "Memory contradiction detection - referenced in README but not implemented"
+      },
+      {
+        "feature": "PatternExtractor Agent",
+        "status": "TODO",
+        "lines_needed": 400,
+        "criticality": "MEDIUM",
+        "description": "Pattern detection from events - mentioned in architecture"
+      },
+      {
+        "feature": "Embeddings batch update",
+        "status": "TODO",
+        "location": "cortex/consolidation.py",
+        "criticality": "MEDIUM",
+        "description": "Batch Voyage AI calls not implemented (commented: TODO)"
+      },
+      {
+        "feature": "MCP alerting",
+        "status": "TODO",
+        "location": "cortex/continuation_daemon.py",
+        "criticality": "LOW",
+        "description": "Email/Slack alerts for daemon failures"
+      },
+      {
+        "feature": "Code generation",
+        "status": "TODO",
+        "location": "cortex/headless_worker.py",
+        "criticality": "LOW",
+        "description": "Exa search + doc fetching not implemented"
+      }
+    ],
+    
+    "architectural_gaps": [
+      {
+        "gap": "No clear layering",
+        "impact": "Services import from services (circular risk)",
+        "solution": "Domain-driven layers: (Handlers → UseCases → Services → Repositories)"
+      },
+      {
+        "gap": "No error recovery patterns",
+        "impact": "Failed L1 events may not retry",
+        "solution": "Dead letter queue in Redis, retry workers"
+      },
+      {
+        "gap": "No event bus",
+        "impact": "Agents tightly coupled",
+        "solution": "Redis pub/sub event bus for decoupling"
+      },
+      {
+        "gap": "Limited observability",
+        "impact": "Hard to trace multi-step memory operations",
+        "solution": "Unified tracing spans across all services"
+      },
+      {
+        "gap": "No cache invalidation strategy",
+        "impact": "Stale embeddings possible",
+        "solution": "Versioning scheme + TTL-based invalidation"
+      }
+    ]
+  },
+  
+  "recommendations": {
+    "priority_1_critical": [
+      {
+        "title": "Consolidate Memory Services",
+        "effort_days": 3,
+        "impact": "Eliminates 400+ lines duplication",
+        "steps": [
+          "Create services/memory/ subdirectory",
+          "Move embedding logic to embeddings.py (single source)",
+          "Move reranking logic to reranking.py (single source)",
+          "Move search orchestration to search_orchestrator.py",
+          "Refactor memory_service.py to be coordinator",
+          "Remove voyage_wrapper.py and cohere_wrapper.py"
+        ]
+      },
+      {
+        "title": "Split agi_tools_mcp.py",
+        "effort_days": 4,
+        "impact": "Reduces 2954 line file to manageable modules",
+        "steps": [
+          "Create cortex/mcp_tools/ directory",
+          "memory_tools.py - memory operations",
+          "database_tools.py - PostgreSQL operations",
+          "agent_tools.py - agent launch/results",
+          "mcp_discovery_tools.py - Smithery/MCP management",
+          "Create agi_tools_mcp.py as thin dispatcher"
+        ]
+      },
+      {
+        "title": "Implement Missing Agents",
+        "effort_days": 5,
+        "impact": "Completes agent architecture",
+        "steps": [
+          "ConsolidatorAgent - LTP/LTD (LangGraph based)",
+          "ValidatorAgent - contradiction detection",
+          "PatternExtractor - insight detection",
+          "Register in daemon/orchestrator.py",
+          "Add unit tests for each"
+        ]
+      }
+    ],
+    
+    "priority_2_important": [
+      {
+        "title": "Organize Backend Architecture by Layers",
+        "effort_days": 4,
+        "impact": "Clearer code organization",
+        "new_structure": {
+          "backend/": {
+            "handlers/": "FastAPI route handlers",
+            "usecases/": "Business logic workflows",
+            "services/": "External integrations only",
+            "repositories/": "Data access layer",
+            "models/": "Domain models (unified)",
+            "schemas/": "GraphQL types",
+            "middleware/": "Observability, auth, rate-limit",
+            "utils/": "Shared helpers"
+          }
+        }
+      },
+      {
+        "title": "Extract Neo4j Logic from memory_service",
+        "effort_days": 2,
+        "impact": "Reduces memory_service from 1084 to ~600 lines",
+        "steps": [
+          "Create services/graph/ directory",
+          "Move graph.py, neo4j_memory.py logic there",
+          "Create graph_coordinator.py for orchestration",
+          "Remove graph imports from memory_service"
+        ]
+      },
+      {
+        "title": "Create Event Bus System",
+        "effort_days": 3,
+        "impact": "Decouples agents, enables event-driven architecture",
+        "steps": [
+          "Redis pub/sub wrapper (events/bus.py)",
+          "Event types (events/types.py)",
+          "Event handlers registry (events/handlers.py)",
+          "L1Observer emits events instead of direct calls"
+        ]
+      }
+    ],
+    
+    "priority_3_nice_to_have": [
+      {
+        "title": "Create Common Models Directory",
+        "effort_days": 1,
+        "impact": "Single source of truth for data models"
+      },
+      {
+        "title": "Extract Frontend Utils Library",
+        "effort_days": 2,
+        "impact": "Reduce component file sizes"
+      },
+      {
+        "title": "Dead Letter Queue Implementation",
+        "effort_days": 2,
+        "impact": "Better error recovery"
+      }
+    ]
+  },
+  
+  "reorganization_proposal": {
+    "backend_target_structure": {
+      "api/": {
+        "handlers/": ["memory_handlers.py", "agent_handlers.py", "graph_handlers.py"],
+        "schemas/": ["memory.py", "agent.py", "graph.py"],
+        "__init__.py": "API routes assembly"
+      },
+      "domain/": {
+        "usecases/": ["memory_usecases.py", "agent_usecases.py", "graph_usecases.py"],
+        "models/": ["memory_models.py", "agent_models.py", "graph_models.py"],
+        "events/": ["bus.py", "types.py", "handlers.py"]
+      },
+      "services/": {
+        "embeddings/": ["voyage.py", "embedding_service.py"],
+        "reranking/": ["cohere.py", "reranking_service.py"],
+        "search/": ["search_orchestrator.py", "bm25.py", "semantic.py"],
+        "graph/": ["graph_coordinator.py", "spreading_activation.py"],
+        "memory/": ["memory_orchestrator.py", "store.py", "cache.py"]
+      },
+      "repositories/": ["memory_repo.py", "agent_repo.py"],
+      "agents/": {
+        "l1_observer/": ["graph.py (core)", "nodes/"],
+        "consolidator/": ["graph.py", "nodes/"],
+        "validator/": ["graph.py", "nodes/"],
+        "base_agent.py": "Abstract base"
+      },
+      "middleware/": ["observability.py", "auth.py", "rate_limit.py"],
+      "utils/": ["date.py", "validation.py", "formatters.py"]
+    },
+    
+    "cortex_target_structure": {
+      "mcp_tools/": [
+        "memory_tools.py (search, store, stats)",
+        "database_tools.py (query, execute)",
+        "agent_tools.py (launch, results)",
+        "mcp_discovery_tools.py (Smithery)"
+      ],
+      "workers/": ["install_mcp.py", "task_executor.py", "pool.py"],
+      "orchestration/": ["daemon.py", "agent_manager.py", "resilience.py"],
+      "hooks/": ["capture.py", "consolidate.py", "learn.py"],
+      "agi_tools_mcp.py": "Entry point (thin)"
+    },
+    
+    "frontend_target_structure": {
+      "src/": {
+        "features/": {
+          "memory/": ["Memory components", "Memory hooks"],
+          "agents/": ["Agent components", "Agent hooks"],
+          "blocks/": ["TimeBlock components"]
+        },
+        "shared/": {
+          "components/": ["UI components", "Charts"],
+          "hooks/": ["Shared logic"],
+          "utils/": ["Formatters", "Validators"]
+        },
+        "lib/": ["API clients", "GraphQL setup"]
+      }
+    }
+  },
+  
+  "agent_team_proposal": {
+    "current_team": {
+      "count": 2,
+      "agents": ["L1Observer", "FrontendManager"]
+    },
+    "proposed_team": {
+      "count": 7,
+      "by_tier": {
+        "tier_1_always_on": [
+          {
+            "name": "L1Observer",
+            "type": "Event-driven",
+            "schedule": "Immediate",
+            "responsibility": "Event classification, importance scoring, enrichment, storage",
+            "status": "EXISTS - Fully implemented"
+          }
+        ],
+        "tier_2_scheduled": [
+          {
+            "name": "Consolidator",
+            "type": "Scheduled",
+            "schedule": "1 hour",
+            "responsibility": "LTP/LTD consolidation, merge short-term to long-term",
+            "status": "TODO",
+            "estimated_lines": 300
+          },
+          {
+            "name": "PatternExtractor",
+            "type": "Scheduled",
+            "schedule": "6 hours",
+            "responsibility": "Detect patterns, insights, rule generation",
+            "status": "TODO",
+            "estimated_lines": 400
+          },
+          {
+            "name": "GraphOptimizer",
+            "type": "Scheduled",
+            "schedule": "12 hours",
+            "responsibility": "Neo4j optimization, prune weak links, strengthen hot paths",
+            "status": "TODO",
+            "estimated_lines": 350
+          }
+        ],
+        "tier_3_event_reactive": [
+          {
+            "name": "Validator",
+            "type": "Event-driven (on memory update)",
+            "schedule": "On-demand",
+            "responsibility": "Check contradictions, temporal consistency",
+            "status": "TODO",
+            "estimated_lines": 250
+          },
+          {
+            "name": "FrontendManager",
+            "type": "Event-driven (on memory update)",
+            "schedule": "On-demand",
+            "responsibility": "Generate/update React components",
+            "status": "EXISTS - Needs refactor",
+            "current_lines": 745
+          },
+          {
+            "name": "EmbeddingUpdater",
+            "type": "Scheduled",
+            "schedule": "Daily",
+            "responsibility": "Update embeddings for modified memories",
+            "status": "TODO",
+            "estimated_lines": 250
+          }
+        ]
+      }
+    },
+    "agent_collaboration_patterns": {
+      "event_flow": "L1Observer → [Event Bus] → Consolidator/Validator/FrontendManager",
+      "consolidated_flow": "Consolidator → update Neo4j → triggers EmbeddingUpdater + PatternExtractor",
+      "graph_optimization": "GraphOptimizer → runs periodically, independent"
+    }
+  },
+  
+  "implementation_roadmap": {
+    "phase_1_foundation": {
+      "duration_days": 5,
+      "goal": "Clean up duplication and organize architecture",
+      "tasks": [
+        {
+          "task": "Consolidate embedding wrappers",
+          "days": 1,
+          "blocking": true
+        },
+        {
+          "task": "Consolidate reranking wrappers",
+          "days": 1,
+          "blocking": true
+        },
+        {
+          "task": "Organize services/ into submodules",
+          "days": 2,
+          "blocking": true
+        },
+        {
+          "task": "Create event bus system",
+          "days": 1,
+          "blocking": true
+        }
+      ]
+    },
+    "phase_2_agents": {
+      "duration_days": 8,
+      "goal": "Build complete agent ecosystem",
+      "tasks": [
+        {
+          "task": "Implement ConsolidatorAgent",
+          "days": 2,
+          "blocking": false
+        },
+        {
+          "task": "Implement ValidatorAgent",
+          "days": 2,
+          "blocking": false
+        },
+        {
+          "task": "Implement PatternExtractor",
+          "days": 2,
+          "blocking": false
+        },
+        {
+          "task": "Test all agents together",
+          "days": 2,
+          "blocking": false
+        }
+      ]
+    },
+    "phase_3_optimization": {
+      "duration_days": 6,
+      "goal": "Optimize and improve resilience",
+      "tasks": [
+        {
+          "task": "Implement dead letter queue",
+          "days": 2,
+          "blocking": false
+        },
+        {
+          "task": "Refactor frontend_manager.py",
+          "days": 2,
+          "blocking": false
+        },
+        {
+          "task": "Performance profiling and optimization",
+          "days": 2,
+          "blocking": false
+        }
+      ]
+    }
+  },
+  
+  "critical_decisions": {
+    "architecture_choice": {
+      "decision": "Keep monorepo structure",
+      "rationale": "AGI system needs tight integration between backend/cortex/frontend",
+      "alternative_rejected": "Multiple repos would increase complexity for unified memory system"
+    },
+    "service_layer": {
+      "decision": "Maintain service-oriented approach but with clear boundaries",
+      "rationale": "Each domain (embeddings, search, graph, memory store) is distinct",
+      "action": "Create domain-specific sub-services with orchestrator"
+    },
+    "agent_strategy": {
+      "decision": "Event-bus based agent communication",
+      "rationale": "Decouples agents, enables horizontal scaling",
+      "implementation": "Redis pub/sub + typed event system"
+    }
+  }
+}

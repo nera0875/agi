@@ -7,13 +7,14 @@ Coût: $0.13 per 1M tokens
 import hashlib
 import httpx
 import asyncpg
+import os
 from typing import List, Optional
 import logging
 
 logger = logging.getLogger(__name__)
 
 # Voyage AI Config
-VOYAGE_API_KEY = "pa-_pHrv3KWlnL1OBRyJtxd2R1oNTD9PVV5i9qN7pMw"  # Depuis .env
+VOYAGE_API_KEY = os.getenv("VOYAGE_API_KEY", "")
 VOYAGE_API_URL = "https://api.voyageai.com/v1/embeddings"
 VOYAGE_MODEL = "voyage-3"
 

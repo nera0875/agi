@@ -1,0 +1,172 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                   GIT PRE-MODIFICATION BACKUP HOOK                            ║
+║                          Quick Reference Guide                                ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+🔒 WHAT IT DOES
+────────────────────────────────────────────────────────────────────────────────
+• Auto-creates Git backup branch BEFORE editing critical files
+• Timestamp-based naming: safety/backup-before-modification-YYYYMMDD_HHMMSS
+• Transparent operation - you don't see it working
+• Allows easy rollback if something goes wrong
+
+
+📁 PROTECTED FILES (Auto-Backup Triggered)
+────────────────────────────────────────────────────────────────────────────────
+✅ CLAUDE.md
+✅ .claude/agents/*
+✅ .claude/skills/*
+✅ .claude/commands/*
+✅ backend/api/schema.py
+✅ backend/services/*
+✅ backend/agents/*
+✅ cortex/agi_tools_mcp.py
+✅ cortex/local_mcp_router.py
+✅ cortex/consolidation.py
+
+
+📊 VIEW BACKUPS
+────────────────────────────────────────────────────────────────────────────────
+# List all safety backups
+git branch -v | grep safety/
+
+# See what's in a backup
+git diff master safety/backup-before-modification-20251020_163035
+
+# Count total backups
+git branch | grep safety/ | wc -l
+
+
+🔄 ROLLBACK FROM BACKUP
+────────────────────────────────────────────────────────────────────────────────
+# Option 1: Check backup first
+git checkout safety/backup-before-modification-20251020_163035
+git diff master                    # See changes
+
+# Option 2: Restore backup to master
+git checkout master
+git reset --hard safety/backup-before-modification-20251020_163035
+
+# Option 3: Create branch from backup for review
+git checkout -b review/from-backup safety/backup-before-modification-20251020_163035
+
+
+🗑️  CLEANUP
+────────────────────────────────────────────────────────────────────────────────
+# Delete single backup (after verification)
+git branch -D safety/backup-before-modification-20251020_163035
+
+# Delete all safety backups (WARNING: deletes all!)
+git branch -D $(git branch | grep safety/)
+
+# Keep recent, delete older than 7 days
+# (manual review recommended)
+
+
+⚙️  HOW IT WORKS (Background)
+────────────────────────────────────────────────────────────────────────────────
+1. Claude Code initiates Edit() on critical file
+2. PreToolUse hook triggers git_pre_modification_backup.sh
+3. Hook detects file is in CRITICAL_PATTERNS
+4. Creates feature branch: safety/backup-before-modification-TIMESTAMP
+5. Commits current state with timestamp + rollback info
+6. Returns to master branch
+7. Edit proceeds normally on master
+8. You can recover from backup anytime
+
+
+📝 BACKUP COMMIT MESSAGE FORMAT
+────────────────────────────────────────────────────────────────────────────────
+🔒 SAFETY BACKUP before modifying: backend/api/schema.py
+
+Timestamp: 20251020_163035
+Original branch: master
+Trigger: pre-modification-hook
+Backup branch: safety/backup-before-modification-20251020_163035
+
+This is an automatic safety commit before critical modification.
+
+Rollback: git checkout safety/backup-before-modification-20251020_163035
+
+
+✅ BEST PRACTICES
+────────────────────────────────────────────────────────────────────────────────
+✓ Let hook run automatically (transparent safety)
+✓ Check backups exist for major changes: git branch -v | grep safety/
+✓ Clean up old backups weekly to save space
+✓ Use backup branches for parallel work
+✓ Tag important backups: git tag archived/backup-20251020 safety/...
+✓ Never force-delete if unsure - use git checkout first
+
+
+⚠️  ERROR SCENARIOS
+────────────────────────────────────────────────────────────────────────────────
+Scenario: Hook fails silently
+→ Result: Modification still proceeds (not blocked)
+→ Action: Create manual backup before continuing
+
+Scenario: Not in Git repository
+→ Result: [Warning] Not in git repository, skipping backup
+→ Action: Proceed manually or init Git
+
+Scenario: No changes to backup
+→ Result: Hook exits cleanly
+→ Action: No backup created (nothing to backup)
+
+
+🆘 FIND YOUR BACKUP
+────────────────────────────────────────────────────────────────────────────────
+# Find backup by file modified
+git log --all --grep="backend/api/schema.py"
+
+# Find backup by date
+git log --all --since="2025-10-20" --grep="SAFETY BACKUP"
+
+# Find most recent backup
+git branch -v | grep safety/ | head -1
+
+# See full history with times
+git log --all --oneline --decorate | grep safety
+
+
+📚 DETAILED DOCUMENTATION
+────────────────────────────────────────────────────────────────────────────────
+Full guide: .claude/hooks/GIT_BACKUP_HOOK.md
+Implementation: .claude/hooks/git_pre_modification_backup.sh
+
+
+🎯 TYPICAL WORKFLOW
+────────────────────────────────────────────────────────────────────────────────
+1. Claude Code calls Edit("backend/api/schema.py", ...)
+   ↓ (Hook auto-runs, creates backup branch)
+2. Modification proceeds on master
+3. Tests run, verification happens
+4. If SUCCESS → Delete backup: git branch -D safety/backup-...
+5. If FAILURE → Restore: git reset --hard safety/backup-...
+6. Cleanup old backups regularly: git branch -D $(git branch -v | grep safety/ | awk '{print $1}')
+
+
+📞 NEED HELP?
+────────────────────────────────────────────────────────────────────────────────
+Scenario: "Can I undo last modification?"
+→ git branch -v | grep safety/
+→ git checkout safety/backup-before-modification-20251020_163035
+→ Review changes, then reset if needed
+
+Scenario: "What files are protected?"
+→ See PROTECTED FILES section above
+→ Edit hook file to add more: .claude/hooks/git_pre_modification_backup.sh
+
+Scenario: "How much space do backups use?"
+→ Very little (Git is efficient, mostly metadata)
+→ Delete old ones weekly: git branch -D safety/backup-before-modification-20251020_*
+
+Scenario: "Is this backup permanent?"
+→ No, backup branches can be deleted anytime
+→ Commit to main branches if you want to keep changes permanently
+
+────────────────────────────────────────────────────────────────────────────────
+Last Updated: 2025-10-20
+Status: Production Ready ✅
+Hook Version: 1.0
+────────────────────────────────────────────────────────────────────────────────

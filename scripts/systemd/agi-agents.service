@@ -1,0 +1,22 @@
+[Unit]
+Description=AGI Autonomous Agents Daemon
+After=network.target postgresql.service redis.service neo4j.service
+Wants=postgresql.service redis.service neo4j.service
+
+[Service]
+Type=simple
+User=pilote
+Group=pilote
+WorkingDirectory=/home/pilote/projet/agi
+Environment="PATH=/usr/bin:/usr/local/bin"
+Environment="PYTHONPATH=/home/pilote/projet/agi"
+EnvironmentFile=/home/pilote/projet/agi/.env
+ExecStart=/usr/bin/python3 /home/pilote/projet/agi/cortex/daemon/orchestrator.py
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=agi-agents
+
+[Install]
+WantedBy=multi-user.target

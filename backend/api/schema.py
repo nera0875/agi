@@ -213,19 +213,17 @@ class KnownMCP:
 @strawberry.type
 class DatabaseTable:
     """Database table information"""
-    table_name: str = strawberry.field(name="tableName")
-    row_count: int = strawberry.field(name="rowCount")
-    column_count: int = strawberry.field(name="columnCount")
-    table_size: Optional[str] = strawberry.field(name="tableSize", default=None)
+    name: str
+    schema: str
+    row_count: int = strawberry.field(name="rowCount", default=0)
 
 
 @strawberry.type
 class TableColumn:
     """Table column information"""
-    column_name: str = strawberry.field(name="columnName")
-    data_type: str = strawberry.field(name="dataType")
-    is_nullable: bool = strawberry.field(name="isNullable")
-    column_default: Optional[str] = strawberry.field(name="columnDefault", default=None)
+    name: str
+    type: str
+    nullable: bool = True
 
 
 @strawberry.type
@@ -256,8 +254,16 @@ class NeuralMetrics:
 
 
 @strawberry.type
+class TableDataResult:
+    """Complete table data with metadata"""
+    columns: List[TableColumn]
+    rows: List[JSON]
+    total: int
+
+
+@strawberry.type
 class TableRow:
-    """Table row data"""
+    """Table row data (legacy)"""
     data: JSON
 
 
@@ -772,66 +778,102 @@ class Query:
 
     @strawberry.field
     async def get_database_tables(self, info: Info) -> List["DatabaseTable"]:
-        """Get all tables in the database with stats"""
+        """Get all tables in the database"""
         pool = await db.connect()
 
         query = """
             SELECT
-                schemaname || '.' || relname as table_name,
-                n_live_tup as row_count,
-                (SELECT COUNT(*) FROM information_schema.columns
-                 WHERE table_schema = t.schemaname AND table_name = t.relname) as column_count,
-                pg_size_pretty(pg_total_relation_size((t.schemaname || '.' || t.relname)::regclass)) as table_size
-            FROM pg_stat_user_tables t
-            WHERE t.schemaname = 'public'
-            ORDER BY n_live_tup DESC
+                table_schema as schema,
+                table_name as name
+            FROM information_schema.tables
+            WHERE table_schema = 'public'
+            ORDER BY table_name
         """
 
         async with pool.acquire() as conn:
             rows = await conn.fetch(query)
 
-        return [
-            DatabaseTable(
-                table_name=row["table_name"].replace("public.", ""),
-                row_count=row["row_count"] or 0,
-                column_count=row["column_count"] or 0,
-                table_size=row["table_size"]
-            )
-            for row in rows
-        ]
+            # Get row counts
+            tables = []
+            for row in rows:
+                count_query = f"SELECT COUNT(*) FROM {row['schema']}.{row['name']}"
+                count = await conn.fetchval(count_query)
+                tables.append(DatabaseTable(
+                    name=row["name"],
+                    schema=row["schema"],
+                    row_count=count or 0
+                ))
+
+        return tables
 
     @strawberry.field
-    async def get_table_schema(
+    async def get_database_table_data(
         self,
         info: Info,
-        table_name: str
-    ) -> List["TableColumn"]:
-        """Get schema information for a specific table"""
+        table: str,
+        limit: int = 100,
+        offset: int = 0,
+        filters: Optional[JSON] = None
+    ) -> "TableDataResult":
+        """Get table data with columns and total count"""
         pool = await db.connect()
 
-        query = """
-            SELECT
-                column_name,
-                data_type,
-                is_nullable = 'YES' as is_nullable,
-                column_default
-            FROM information_schema.columns
-            WHERE table_schema = 'public' AND table_name = $1
-            ORDER BY ordinal_position
-        """
+        # Sanitize table name
+        if not table.replace("_", "").isalnum():
+            raise Exception("Invalid table name")
 
         async with pool.acquire() as conn:
-            rows = await conn.fetch(query, table_name)
+            # Get columns
+            columns_query = """
+                SELECT column_name, data_type, is_nullable
+                FROM information_schema.columns
+                WHERE table_schema = 'public' AND table_name = $1
+                ORDER BY ordinal_position
+            """
+            columns_rows = await conn.fetch(columns_query, table)
 
-        return [
-            TableColumn(
-                column_name=row["column_name"],
-                data_type=row["data_type"],
-                is_nullable=row["is_nullable"],
-                column_default=row["column_default"]
-            )
-            for row in rows
-        ]
+            columns = [
+                TableColumn(
+                    name=row["column_name"],
+                    type=row["data_type"],
+                    nullable=row["is_nullable"] == "YES"
+                )
+                for row in columns_rows
+            ]
+
+            # Get total count
+            count_query = f"SELECT COUNT(*) FROM {table}"
+            total = await conn.fetchval(count_query)
+
+            # Get data rows
+            data_query = f"SELECT * FROM {table} LIMIT $1 OFFSET $2"
+            data_rows = await conn.fetch(data_query, limit, offset)
+
+            # Serialize data
+            def serialize_value(val):
+                from uuid import UUID
+                from datetime import datetime, date
+                from decimal import Decimal
+
+                if isinstance(val, UUID):
+                    return str(val)
+                elif isinstance(val, (datetime, date)):
+                    return val.isoformat()
+                elif isinstance(val, Decimal):
+                    return float(val)
+                else:
+                    return val
+
+            rows = [
+                {k: serialize_value(v) for k, v in dict(row).items()}
+                for row in data_rows
+            ]
+
+        return TableDataResult(
+            columns=columns,
+            rows=rows,
+            total=total or 0
+        )
 
     @strawberry.field
     async def get_table_data(
@@ -1486,6 +1528,119 @@ class Mutation:
             created_at=data['created_at'],
             completed_at=data.get('completed_at')
         )
+
+    @strawberry.mutation
+    async def update_table_row(
+        self,
+        info: Info,
+        table: str,
+        id: str,
+        data: JSON
+    ) -> JSON:
+        """Update a row in a table"""
+        pool = await db.connect()
+
+        # Sanitize table name
+        if not table.replace("_", "").isalnum():
+            raise Exception("Invalid table name")
+
+        # Build UPDATE query
+        columns = list(data.keys())
+        set_clause = ", ".join([f"{col} = ${i+2}" for i, col in enumerate(columns)])
+        query = f"UPDATE {table} SET {set_clause} WHERE id = $1 RETURNING *"
+
+        values = [id] + list(data.values())
+
+        async with pool.acquire() as conn:
+            row = await conn.fetchrow(query, *values)
+
+        if not row:
+            raise Exception(f"Row with id {id} not found")
+
+        # Serialize result
+        def serialize_value(val):
+            from uuid import UUID
+            from datetime import datetime, date
+            from decimal import Decimal
+
+            if isinstance(val, UUID):
+                return str(val)
+            elif isinstance(val, (datetime, date)):
+                return val.isoformat()
+            elif isinstance(val, Decimal):
+                return float(val)
+            else:
+                return val
+
+        return {k: serialize_value(v) for k, v in dict(row).items()}
+
+    @strawberry.mutation
+    async def insert_table_row(
+        self,
+        info: Info,
+        table: str,
+        data: JSON
+    ) -> JSON:
+        """Insert a new row into a table"""
+        pool = await db.connect()
+
+        # Sanitize table name
+        if not table.replace("_", "").isalnum():
+            raise Exception("Invalid table name")
+
+        # Build INSERT query
+        columns = list(data.keys())
+        columns_str = ", ".join(columns)
+        placeholders = ", ".join([f"${i+1}" for i in range(len(columns))])
+        query = f"INSERT INTO {table} ({columns_str}) VALUES ({placeholders}) RETURNING *"
+
+        values = list(data.values())
+
+        async with pool.acquire() as conn:
+            row = await conn.fetchrow(query, *values)
+
+        # Serialize result
+        def serialize_value(val):
+            from uuid import UUID
+            from datetime import datetime, date
+            from decimal import Decimal
+
+            if isinstance(val, UUID):
+                return str(val)
+            elif isinstance(val, (datetime, date)):
+                return val.isoformat()
+            elif isinstance(val, Decimal):
+                return float(val)
+            else:
+                return val
+
+        return {k: serialize_value(v) for k, v in dict(row).items()}
+
+    @strawberry.mutation
+    async def delete_table_rows(
+        self,
+        info: Info,
+        table: str,
+        ids: List[str]
+    ) -> int:
+        """Delete rows from a table"""
+        pool = await db.connect()
+
+        # Sanitize table name
+        if not table.replace("_", "").isalnum():
+            raise Exception("Invalid table name")
+
+        # Build DELETE query with multiple ids
+        placeholders = ", ".join([f"${i+1}" for i in range(len(ids))])
+        query = f"DELETE FROM {table} WHERE id IN ({placeholders})"
+
+        async with pool.acquire() as conn:
+            result = await conn.execute(query, *ids)
+
+        # Extract count from result (format: "DELETE N")
+        count = int(result.split()[-1]) if result else 0
+
+        return count
 
 
 # ============================================================================

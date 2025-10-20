@@ -5,8 +5,20 @@
       "args": ["/home/pilote/projet/agi/cortex/agi_tools_mcp.py"],
       "env": {
         "PYTHONPATH": "/home/pilote/projet/agi/cortex",
-        "DATABASE_URL": "postgresql://agi_user:mysecretpassword@localhost:5433/agi_db"
+        "DATABASE_URL": "postgresql://agi_user:agi_password@localhost:5432/agi_db"
       }
+    },
+    "exa": {
+      "command": "npx",
+      "args": ["-y", "@smithery/exa-server"]
+    },
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context-7-mcp-server"]
+    },
+    "fetch": {
+      "command": "npx",
+      "args": ["-y", "@smithery-ai/fetch"]
     }
   }
 }

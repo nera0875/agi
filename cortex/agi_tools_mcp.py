@@ -17,13 +17,17 @@ COUCHE 3: MCP Router (execution + isolation)
 import asyncio
 import json
 import logging
+import os
 import subprocess
 import sys
+import hashlib
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Optional
 
 import asyncpg
 import httpx
+import redis
 
 from mcp.server import Server
 from mcp.server.stdio import stdio_server
@@ -83,14 +87,257 @@ SMITHERY_API_KEY = "15d7d8e1-61c3-4dba-a91f-63751eec8b08"
 SMITHERY_PROFILE = "rolling-ladybug-4DEfPv"
 SMITHERY_REGISTRY_URL = "https://registry.smithery.ai/servers"
 
+# ═══════════════════════════════════════════════════════════
+# AUTO-MEMORY WRAPPER CLASSES
+# ═══════════════════════════════════════════════════════════
+
+class PertinenceDetector:
+    """Détecte automatiquement si contenu vaut la peine d'être sauvegardé"""
+
+    KEYWORDS = {
+        "high_value": [
+            "decision", "strategy", "important", "critical",
+            "bug", "error", "fix", "improvement", "optimization",
+            "architecture", "design", "pattern", "insight",
+            "milestone", "breakthrough", "solution"
+        ],
+        "low_value": [
+            "todo", "remind me", "search for", "help with",
+            "what is", "how do", "temporary", "test", "debug"
+        ]
+    }
+
+    @staticmethod
+    def estimate_importance(content: str, type_hint: str = None) -> float:
+        """Score rapide sans LLM (0-1 scale)"""
+        score = 0.5  # Baseline
+        content_lower = content.lower()
+        high_count = sum(1 for kw in PertinenceDetector.KEYWORDS["high_value"]
+                        if kw in content_lower)
+        low_count = sum(1 for kw in PertinenceDetector.KEYWORDS["low_value"]
+                       if kw in content_lower)
+        score += high_count * 0.1
+        score -= low_count * 0.15
+        if type_hint == "error":
+            score += 0.2
+        elif type_hint == "decision":
+            score += 0.15
+        elif type_hint == "insight":
+            score += 0.15
+        if len(content) < 50:
+            score -= 0.2
+        elif len(content) > 5000:
+            score -= 0.1
+        return max(0.0, min(1.0, score))
+
+
+class EmbeddingService:
+    """Génère embeddings via Voyage AI"""
+
+    def __init__(self, api_key: str):
+        self.api_key = api_key
+        self.base_url = "https://api.voyageai.com/v1/embeddings"
+        self.model = "voyage-2"
+
+    async def embed(self, text: str) -> Optional[list]:
+        """Genère embedding (1024-dimensional vector)"""
+        try:
+            async with httpx.AsyncClient(timeout=30) as client:
+                response = await client.post(
+                    self.base_url,
+                    json={
+                        "input": text,
+                        "model": self.model
+                    },
+                    headers={
+                        "Authorization": f"Bearer {self.api_key}",
+                        "Content-Type": "application/json"
+                    }
+                )
+                if response.status_code == 200:
+                    data = response.json()
+                    embedding = data["data"][0]["embedding"]
+                    return embedding
+                else:
+                    logger.warning(f"Embedding API error: {response.status_code}")
+                    return None
+        except Exception as e:
+            logger.warning(f"Embedding generation failed: {e}")
+            return None
+
+    async def embed_batch(self, texts: list) -> list:
+        """Batch embedding for efficiency"""
+        return await asyncio.gather(
+            *[self.embed(text) for text in texts]
+        )
+
+
+class MCPAutoMemoryWrapper:
+    """Wrapper qui intercepte MCP tool calls et sauvegarde automatiquement"""
+
+    def __init__(self, db_pool, redis_client, embedding_service: EmbeddingService):
+        self.db_pool = db_pool
+        self.redis = redis_client
+        self.embeddings = embedding_service
+        self.context = {
+            "current_user_message": None,
+            "tool_calls": [],
+            "tool_results": []
+        }
+
+    async def wrap_user_input(self, message: str):
+        """Sauvegarde input utilisateur"""
+        self.context["current_user_message"] = message
+        importance = PertinenceDetector.estimate_importance(
+            message,
+            type_hint="conversation"
+        )
+        if importance >= 0.3:
+            await self._save_to_all_layers(
+                content=message,
+                type_="conversation",
+                importance=importance,
+                metadata={"role": "user"}
+            )
+
+    async def wrap_tool_call(self, tool_name: str, arguments: dict):
+        """Wrapper autour d'un tool call"""
+        call_record = {
+            "tool": tool_name,
+            "arguments": arguments,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        self.context["tool_calls"].append(call_record)
+
+    async def wrap_assistant_response(self, response: str):
+        """Sauvegarde réponse assistant"""
+        self._detect_decisions(response)
+        importance = PertinenceDetector.estimate_importance(
+            response,
+            type_hint="decision"
+        )
+        if importance >= 0.4:
+            await self._save_to_all_layers(
+                content=response,
+                type_=self._detect_type(response),
+                importance=importance,
+                metadata={"role": "assistant"}
+            )
+
+    async def _save_to_all_layers(self, content: str, type_: str,
+                                  importance: float, metadata: dict):
+        """Orchestration complète de sauvegarde"""
+        entry_hash = hashlib.sha256(content.encode()).hexdigest()[:12]
+        await self._save_l1(entry_hash, content, type_, importance)
+        entry_id = await self._save_l2(entry_hash, content, type_, importance, metadata)
+        await self._save_l3(entry_id, entry_hash, content, type_)
+        await self._queue_neo4j_sync(entry_id, entry_hash, content, type_, importance)
+
+    async def _save_l1(self, entry_hash: str, content: str, type_: str, importance: float):
+        """Save to Redis cache"""
+        ttl = {
+            "conversation": 7200,
+            "decision": 86400,
+            "technical": 259200,
+            "error": 1296000,
+            "insight": 2592000
+        }.get(type_, 3600)
+        try:
+            self.redis.hset(f"agi:cache:{entry_hash}", mapping={
+                "content": content[:500],
+                "type": type_,
+                "importance": importance,
+                "accessed": datetime.utcnow().isoformat()
+            })
+            self.redis.expire(f"agi:cache:{entry_hash}", ttl)
+            self.redis.sadd(f"agi:cache:idx:type:{type_}", entry_hash)
+            self.redis.zadd("agi:cache:idx:importance", {entry_hash: importance})
+        except Exception as e:
+            logger.warning(f"L1 save failed: {e}")
+
+    async def _save_l2(self, entry_hash: str, content: str, type_: str,
+                       importance: float, metadata: dict):
+        """Save to PostgreSQL buffer"""
+        try:
+            async with self.db_pool.acquire() as conn:
+                entry_id = await conn.fetchval("""
+                    INSERT INTO memory_working_buffer
+                    (entry_hash, content, type, importance, metadata)
+                    VALUES ($1, $2, $3, $4, $5)
+                    RETURNING id
+                """, entry_hash, content, type_, importance, json.dumps(metadata))
+            return entry_id
+        except Exception as e:
+            logger.warning(f"L2 save failed: {e}")
+            return None
+
+    async def _save_l3(self, entry_id, entry_hash: str, content: str, type_: str):
+        """Save embeddings to pgvector"""
+        if not entry_id:
+            return
+        try:
+            embedding = await self.embeddings.embed(content)
+            if embedding:
+                async with self.db_pool.acquire() as conn:
+                    await conn.execute("""
+                        INSERT INTO memory_embeddings
+                        (entry_hash, content, embedding, type)
+                        VALUES ($1, $2, $3, $4)
+                    """, entry_hash, content, embedding, type_)
+                async with self.db_pool.acquire() as conn:
+                    await conn.execute("""
+                        UPDATE memory_working_buffer
+                        SET embeddings_generated = TRUE
+                        WHERE id = $1
+                    """, entry_id)
+        except Exception as e:
+            logger.warning(f"L3 save failed: {e}")
+
+    async def _queue_neo4j_sync(self, entry_id, entry_hash: str, content: str,
+                               type_: str, importance: float):
+        """Queue entry for Neo4j sync"""
+        if not entry_id:
+            return
+        try:
+            async with self.db_pool.acquire() as conn:
+                await conn.execute("""
+                    INSERT INTO memory_neo4j_sync_log
+                    (entry_id, entry_hash, node_label, status)
+                    VALUES ($1, $2, $3, 'pending')
+                """, entry_id, entry_hash, type_.upper())
+        except Exception as e:
+            logger.warning(f"Neo4j sync queue failed: {e}")
+
+    def _detect_type(self, content: str) -> str:
+        """Détecte type de contenu"""
+        content_lower = content.lower()
+        if "error" in content_lower or "bug" in content_lower:
+            return "error"
+        elif "decision" in content_lower or "decided" in content_lower:
+            return "decision"
+        elif "discovered" in content_lower or "realized" in content_lower:
+            return "insight"
+        elif "strategy" in content_lower or "plan" in content_lower:
+            return "strategic"
+        else:
+            return "technical"
+
+    def _detect_decisions(self, response: str):
+        """Détecte décisions importantes"""
+        keywords = ["i decided", "i will", "let's", "decision", "plan"]
+        if any(kw in response.lower() for kw in keywords):
+            logger.info("[DECISION DETECTED] Marked for high importance")
+
+
 # MCP Server
 app = Server("agi-tools")
 db_pool: Optional[asyncpg.Pool] = None
+auto_memory: Optional[MCPAutoMemoryWrapper] = None
 
 
 async def init_db():
     """Initialize database connection pool + create tables"""
-    global db_pool
+    global db_pool, auto_memory
     db_pool = await asyncpg.create_pool(
         DATABASE_URL,
         min_size=2,
@@ -117,6 +364,20 @@ async def init_db():
             logger.info("✅ Smithery cache table ready")
     except Exception as e:
         logger.warning(f"Could not create cache table: {e}")
+
+    # Initialize MCPAutoMemoryWrapper
+    try:
+        redis_client = redis.Redis(host='localhost', port=6379, decode_responses=True)
+        embedding_service = EmbeddingService(api_key=os.getenv("VOYAGE_API_KEY", ""))
+        auto_memory = MCPAutoMemoryWrapper(
+            db_pool=db_pool,
+            redis_client=redis_client,
+            embedding_service=embedding_service
+        )
+        logger.info("✅ MCPAutoMemoryWrapper initialized")
+    except Exception as e:
+        logger.warning(f"⚠️  MCPAutoMemoryWrapper initialization failed: {e}")
+        auto_memory = None
 
 
 async def close_db():
@@ -948,9 +1209,31 @@ Example:
     ]
 
 
+async def _create_tool_response(result: Any, text_content: str = None) -> list[TextContent]:
+    """Helper to create and auto-save tool response"""
+    response_text = text_content or json.dumps(result, indent=2, default=str)
+    response = [TextContent(type="text", text=response_text)]
+
+    # Auto-memory: Wrap response AFTER execution
+    if auto_memory:
+        try:
+            await auto_memory.wrap_assistant_response(response_text)
+        except Exception as e:
+            logger.warning(f"Failed to wrap assistant response: {e}")
+
+    return response
+
+
 @app.call_tool()
 async def call_tool(name: str, arguments: Any) -> list[TextContent]:
-    """Handle tool calls - UNIFIED VERSION (4 tools)"""
+    """Handle tool calls - UNIFIED VERSION (4 tools) + Auto-memory wrapper"""
+
+    # Auto-memory: Wrap tool call BEFORE execution
+    if auto_memory:
+        try:
+            await auto_memory.wrap_tool_call(name, arguments)
+        except Exception as e:
+            logger.warning(f"Failed to wrap tool call: {e}")
 
     try:
         # ═══════════════════════════════════════════════════════
@@ -1265,10 +1548,17 @@ async def call_tool(name: str, arguments: Any) -> list[TextContent]:
 
     except Exception as e:
         logger.error(f"Tool error: {e}", exc_info=True)
-        return [TextContent(
+        error_response = [TextContent(
             type="text",
             text=json.dumps({"error": str(e), "tool": name}, indent=2)
         )]
+        # Auto-memory: Wrap error response AFTER execution
+        if auto_memory:
+            try:
+                await auto_memory.wrap_assistant_response(str(e))
+            except Exception as wrap_err:
+                logger.warning(f"Failed to wrap error response: {wrap_err}")
+        return error_response
 
 
 # ═══════════════════════════════════════════════════════
@@ -1276,12 +1566,12 @@ async def call_tool(name: str, arguments: Any) -> list[TextContent]:
 # ═══════════════════════════════════════════════════════
 
 async def memory_search(query: str, limit: int = 5, tags: list = None) -> dict:
-    """Search memory using hybrid RAG"""
+    """Search memory using hybrid RAG with auto-reinforcement (LTP)"""
 
     async with db_pool.acquire() as conn:
         # Simple text search for now (can upgrade to pgvector later)
         sql = """
-            SELECT section, content, tags, priority, created_at
+            SELECT id, section, content, tags, priority, created_at, strength, access_count
             FROM agi_knowledge
             WHERE content ILIKE $1
         """
@@ -1292,6 +1582,17 @@ async def memory_search(query: str, limit: int = 5, tags: list = None) -> dict:
         else:
             rows = await conn.fetch(sql + " LIMIT $2", f"%{query}%", limit)
 
+        # 🧠 AUTO-REINFORCEMENT (LTP - Long Term Potentiation)
+        # Renforcer patterns utilisés, comme Neo4j le fait déjà pour Files/Rules
+        for row in rows:
+            await conn.execute("""
+                UPDATE agi_knowledge
+                SET access_count = access_count + 1,
+                    last_accessed = NOW(),
+                    strength = LEAST(1.0, COALESCE(strength, 0.5) + 0.05)
+                WHERE id = $1
+            """, row['id'])
+
         return {
             "results": [
                 {
@@ -1299,7 +1600,9 @@ async def memory_search(query: str, limit: int = 5, tags: list = None) -> dict:
                     "content": row["content"],
                     "tags": row["tags"],
                     "priority": row["priority"],
-                    "created_at": str(row["created_at"])
+                    "created_at": str(row["created_at"]),
+                    "strength": row["strength"],
+                    "access_count": row["access_count"]
                 }
                 for row in rows
             ],
@@ -1307,19 +1610,46 @@ async def memory_search(query: str, limit: int = 5, tags: list = None) -> dict:
         }
 
 
-async def memory_store(text: str, type: str, tags: list = None, project: str = "default") -> dict:
-    """Store memory with auto-embeddings"""
+async def memory_store(text: str, type: str, tags: list = None, project: str = "default", sync_neo4j: bool = True) -> dict:
+    """Store memory with auto-embeddings, LTP initialization, and Neo4j sync"""
 
     async with db_pool.acquire() as conn:
+        # 🧠 Générer embedding Voyage AI si disponible
+        embedding = None
+        if VOYAGE_COHERE_AVAILABLE:
+            try:
+                embedding = await embed_single(text)
+                logger.info(f"✅ Embedding generated for memory: {len(embedding)} dimensions")
+            except Exception as e:
+                logger.warning(f"⚠️  Failed to generate embedding: {e}")
+
+        # 🧠 Initialiser strength=0.5, access_count=0 (comme Neo4j Files)
         result = await conn.fetchrow("""
-            INSERT INTO agi_knowledge (section, content, tags, priority)
-            VALUES ($1, $2, $3, 5)
-            RETURNING id
-        """, type, text, tags or [])
+            INSERT INTO agi_knowledge (section, content, tags, priority, strength, access_count, embedding)
+            VALUES ($1, $2, $3, 5, 0.5, 0, $4)
+            RETURNING id, strength, access_count
+        """, type, text, tags or [], embedding)
+
+        memory_id = str(result["id"])
+
+        # 🔄 Sync vers Neo4j automatiquement (optionnel)
+        neo4j_synced = False
+        if sync_neo4j:
+            try:
+                sync_result = await sync_memory_to_neo4j(memory_id)
+                neo4j_synced = sync_result.get("synced", 0) > 0
+                logger.info(f"✅ Memory synced to Neo4j: {neo4j_synced}")
+            except Exception as e:
+                logger.warning(f"⚠️  Neo4j sync failed: {e}")
 
         return {
-            "memory_id": str(result["id"]),
-            "status": "stored"
+            "memory_id": memory_id,
+            "status": "stored",
+            "strength": result["strength"],
+            "access_count": result["access_count"],
+            "has_embedding": embedding is not None,
+            "neo4j_synced": neo4j_synced,
+            "layer": "L2"  # Short-term memory (nouvellement créé)
         }
 
 
@@ -1340,6 +1670,97 @@ async def memory_stats() -> dict:
             "total_memories": total,
             "by_section": {row["section"]: row["count"] for row in by_section}
         }
+
+
+async def sync_memory_to_neo4j(memory_id: str = None) -> dict:
+    """
+    🔄 SYNC PostgreSQL agi_knowledge ↔ Neo4j
+
+    Synchronise mémoires PostgreSQL vers Neo4j pour spreading activation
+    - Crée node Knowledge dans Neo4j
+    - Link concepts automatiquement
+    - Bidirectionnel: Neo4j strength ↔ PostgreSQL strength
+
+    Args:
+        memory_id: Si fourni, sync seulement cette mémoire. Sinon sync toutes.
+    """
+    if not db_pool:
+        return {"error": "Database pool not initialized"}
+
+    async with db_pool.acquire() as conn:
+        # Récupérer mémoires à synchroniser
+        if memory_id:
+            memories = await conn.fetch("""
+                SELECT id, section, content, tags, strength, access_count
+                FROM agi_knowledge WHERE id = $1
+            """, memory_id)
+        else:
+            # Sync seulement celles pas encore synced ou strength changée
+            memories = await conn.fetch("""
+                SELECT id, section, content, tags, strength, access_count
+                FROM agi_knowledge
+                LIMIT 100
+            """)
+
+    if not memories:
+        return {"synced": 0, "message": "No memories to sync"}
+
+    # Connect Neo4j
+    from neo4j import AsyncGraphDatabase
+    neo4j_driver = AsyncGraphDatabase.driver(
+        "bolt://localhost:7687",
+        auth=("neo4j", "Voiture789")
+    )
+
+    synced_count = 0
+
+    try:
+        async with neo4j_driver.session() as session:
+            for mem in memories:
+                # Créer node Knowledge dans Neo4j
+                await session.run("""
+                    MERGE (k:Knowledge {id: $id})
+                    ON CREATE SET
+                        k.section = $section,
+                        k.content = $content,
+                        k.tags = $tags,
+                        k.strength = $strength,
+                        k.access_count = $access_count,
+                        k.created_at = datetime()
+                    ON MATCH SET
+                        k.strength = $strength,
+                        k.access_count = $access_count,
+                        k.last_synced = datetime()
+                """,
+                    id=str(mem['id']),
+                    section=mem['section'],
+                    content=mem['content'][:500],  # Limite pour Neo4j
+                    tags=mem['tags'] or [],
+                    strength=mem['strength'] or 0.5,
+                    access_count=mem['access_count'] or 0
+                )
+
+                # Link concepts (simple pour l'instant: même section = lien)
+                await session.run("""
+                    MATCH (k1:Knowledge {id: $id})
+                    MATCH (k2:Knowledge {section: $section})
+                    WHERE k1.id <> k2.id
+                    MERGE (k1)-[r:RELATED_TO]->(k2)
+                    ON CREATE SET r.strength = 0.3, r.created = datetime()
+                """, id=str(mem['id']), section=mem['section'])
+
+                synced_count += 1
+
+        await neo4j_driver.close()
+
+        return {
+            "synced": synced_count,
+            "message": f"Synchronized {synced_count} memories to Neo4j"
+        }
+
+    except Exception as e:
+        logger.error(f"Neo4j sync error: {e}")
+        return {"error": str(e), "synced": synced_count}
 
 
 # ═══════════════════════════════════════════════════════

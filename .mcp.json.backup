@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "agi-tools": {
+      "command": "python3",
+      "args": ["/home/pilote/projet/agi/cortex/agi_tools_mcp.py"],
+      "env": {
+        "PYTHONPATH": "/home/pilote/projet/agi/cortex",
+        "DATABASE_URL": "postgresql://agi_user:mysecretpassword@localhost:5433/agi_db"
+      }
+    }
+  }
+}

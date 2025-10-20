@@ -1,0 +1,153 @@
+{
+  "name": "Git Rollback on Error Hook",
+  "version": "1.0",
+  "created": "2025-10-20",
+  "location": "/home/pilote/projet/agi/.claude/hooks/",
+  "status": "production_ready",
+  "components": {
+    "main_hook": {
+      "file": "git_rollback_on_error.sh",
+      "type": "bash",
+      "size_kb": 4.5,
+      "executable": true,
+      "purpose": "Main rollback logic with three modes"
+    },
+    "python_wrapper": {
+      "file": "rollback_manager.py",
+      "type": "python",
+      "size_kb": 4.8,
+      "executable": true,
+      "purpose": "Easy Python integration for agents"
+    },
+    "test_suite": {
+      "file": "test_rollback.sh",
+      "type": "bash",
+      "size_kb": 3.1,
+      "executable": true,
+      "purpose": "Validate hook functionality"
+    }
+  },
+  "documentation": [
+    {
+      "file": "README_ROLLBACK.md",
+      "purpose": "Quick overview and navigation",
+      "read_time_min": 3
+    },
+    {
+      "file": "QUICK_REFERENCE.md",
+      "purpose": "One-liner commands",
+      "read_time_min": 2
+    },
+    {
+      "file": "AGENT_INTEGRATION.md",
+      "purpose": "Integration with agent pipeline",
+      "read_time_min": 15
+    },
+    {
+      "file": "ROLLBACK_INTEGRATION.md",
+      "purpose": "Complete technical guide",
+      "read_time_min": 20
+    },
+    {
+      "file": "INTEGRATION_EXAMPLES.py",
+      "purpose": "Real-world code examples",
+      "read_time_min": 10
+    },
+    {
+      "file": "INTEGRATION_CHECKLIST.md",
+      "purpose": "Step-by-step integration guide",
+      "read_time_min": 5
+    }
+  ],
+  "modes": {
+    "soft": {
+      "name": "Soft Rollback",
+      "description": "Preserve changes, undo commit",
+      "use_case": "agent_fail",
+      "creates_backup": false,
+      "loses_changes": false,
+      "risk": "low"
+    },
+    "hard": {
+      "name": "Hard Rollback",
+      "description": "Discard changes, create backup branch",
+      "use_case": "test_fail",
+      "creates_backup": true,
+      "loses_changes": true,
+      "risk": "medium"
+    },
+    "branch": {
+      "name": "Branch Rollback",
+      "description": "Restore from safety backup",
+      "use_case": "critical_error",
+      "creates_backup": true,
+      "loses_changes": true,
+      "risk": "low"
+    }
+  },
+  "logging": {
+    "location": ".claude/meta/rollback.log",
+    "format": "TIMESTAMP | MODE | ERROR_TYPE | DETAILS",
+    "retention": "unlimited",
+    "example": "2025-10-20 16:30:45 | SOFT | agent_fail:code | From: abc1234 | Changes preserved"
+  },
+  "features": [
+    "Three rollback modes (soft/hard/branch)",
+    "Automatic backup branch creation",
+    "Comprehensive logging",
+    "Error handling with graceful fallbacks",
+    "Idempotent operations",
+    "Python and Bash interfaces",
+    "Safety guarantees",
+    "Timestamped recovery branches"
+  ],
+  "integration_points": [
+    {
+      "name": "Agent Executor",
+      "type": "python",
+      "trigger": "agent failure",
+      "mode": "soft",
+      "difficulty": "easy"
+    },
+    {
+      "name": "Test Runner",
+      "type": "python",
+      "trigger": "test failure",
+      "mode": "branch",
+      "difficulty": "medium"
+    },
+    {
+      "name": "CI Pipeline",
+      "type": "bash",
+      "trigger": "build failure",
+      "mode": "hard",
+      "difficulty": "medium"
+    }
+  ],
+  "safety_guarantees": [
+    "Backup branches auto-created on hard rollback",
+    "Recovery branches marked with timestamp",
+    "All operations logged",
+    "No silent failures",
+    "Graceful error handling",
+    "Idempotent (safe to retry)"
+  ],
+  "quick_start": {
+    "bash_direct": "bash .claude/hooks/git_rollback_on_error.sh agent_fail 'error' soft",
+    "python_import": "from rollback_manager import RollbackManager, RollbackMode",
+    "test": "bash .claude/hooks/test_rollback.sh"
+  },
+  "files_created": 8,
+  "total_size_kb": 33,
+  "estimated_integration_time_hours": 2,
+  "production_ready": true,
+  "confidence": "high",
+  "next_steps": [
+    "Read README_ROLLBACK.md",
+    "Read AGENT_INTEGRATION.md",
+    "Follow INTEGRATION_CHECKLIST.md",
+    "Test with agent executor",
+    "Test with test runner",
+    "Monitor rollback.log"
+  ]
+}

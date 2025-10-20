@@ -74,3 +74,82 @@ npm run dev
 - ✅ BM25 full-text search
 
 ## Architecture
+
+### Monorepo Layout
+
+```
+agi/
+├── frontend/               # Next.js frontend (Vercel)
+│   ├── app/               # Next.js 14 app router
+│   ├── components/        # React components (shadcn/ui)
+│   ├── src/guidelines/    # figma.md design rules
+│   └── package.json
+├── backend/               # Python backend + API
+│   ├── api/              # FastAPI routes
+│   ├── services/         # Business logic
+│   └── agents/           # Autonomous agents
+│       ├── base_agent.py
+│       ├── frontend_manager.py
+│       ├── consolidator.py (TODO)
+│       └── validator.py (TODO)
+├── cortex/               # Memory system core
+│   ├── agi_tools_mcp.py  # MCP server
+│   ├── daemon/           # Agent orchestrator
+│   └── hooks/            # Claude Code hooks
+├── scripts/
+│   └── systemd/          # Service files
+├── mcp_servers/          # Local MCP servers
+│   ├── exa-mcp-server    # Exa search API
+│   ├── fetch-mcp         # Web fetch
+│   └── context7-mcp      # Context API
+└── .env                  # Environment variables
+```
+
+### Boucle Fermée (Autonomous Loop)
+
+```
+Events (DB/Redis) → Agents (Python) → Actions (DB/API) → Events (feedback)
+        ↑                                                      ↓
+        └──────────────────── Continuous Loop ────────────────┘
+```
+
+**Frontend (Next.js) = Monitoring only** (not in loop)
+
+### Services Management
+
+#### 1. AGI Agents Daemon
+```bash
+sudo systemctl start agi-agents
+sudo systemctl status agi-agents
+journalctl -u agi-agents -f
+```
+
+#### 2. Backend API
+```bash
+cd backend
+uvicorn api.main:app --reload
+```
+
+#### 3. Frontend Dev
+```bash
+cd frontend
+npm run dev
+```
+
+### Agents Directory
+
+| Agent | Type | Schedule | Purpose |
+|-------|------|----------|---------|
+| FrontendManager | Event-driven | - | Generate/update React components |
+| Consolidator | Scheduled | 1h | LTP/LTD intelligent consolidation |
+| Validator | Event-driven | - | Check memory contradictions |
+| PatternExtractor | Scheduled | 6h | Detect insights from events |
+| Connector | Scheduled | 12h | Neo4j graph optimization |
+
+## Memory System
+
+- **PostgreSQL**: Transactional storage (events, tasks, memories)
+- **Neo4j**: Graph database (relationships, patterns, knowledge graph)
+- **Redis**: Caching and event queue
+- **Voyage AI**: Vector embeddings for semantic search
+- **pgvector**: PostgreSQL extension for similarity search

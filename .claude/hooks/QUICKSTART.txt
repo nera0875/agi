@@ -1,0 +1,231 @@
+╔════════════════════════════════════════════════════════════════╗
+║         AUTO-TRIGGER AGENT HOOK - QUICK START GUIDE             ║
+╚════════════════════════════════════════════════════════════════╝
+
+WHAT IS THIS?
+─────────────────────────────────────────────────────────────────
+A PostToolUse hook that automatically triggers validation agents
+when you edit critical project files. Zero manual intervention.
+
+It just works.
+
+
+THE MAGIC HAPPENS HERE:
+─────────────────────────────────────────────────────────────────
+
+You edit: backend/api/schema.py
+    ↓
+Hook detects automatically
+    ↓
+Launches: debug agent (tests your changes)
+    ↓
+You keep working (agent runs in background)
+    ↓
+Results available in: agents/team/reports/
+
+
+QUICK START (3 steps):
+─────────────────────────────────────────────────────────────────
+
+1. TEST IT
+   bash .claude/hooks/test_hook.sh
+   → Should see: ✅ All tests passed!
+
+2. EDIT A CRITICAL FILE
+   Edit any of these:
+   - backend/api/schema.py
+   - backend/services/memory_service.py
+   - backend/services/graph_service.py
+   - cortex/agi_tools_mcp.py
+   - frontend/src/components/...
+   → Hook triggers automatically
+
+3. MONITOR
+   python3 .claude/hooks/monitor_triggers.py
+   → See what agents are running
+
+
+COMMON COMMANDS:
+─────────────────────────────────────────────────────────────────
+
+Show stats:
+  python3 monitor_triggers.py
+
+Follow in real-time:
+  python3 monitor_triggers.py --follow
+
+Clear old logs:
+  python3 monitor_triggers.py --clear
+
+Test manually:
+  export CLAUDE_TOOL_NAME="Edit"
+  export CLAUDE_FILE_PATH="backend/api/schema.py"
+  python3 auto_trigger_agent.py
+
+
+THE 8 TRIGGER RULES:
+─────────────────────────────────────────────────────────────────
+
+1. backend/api/schema.py
+   → Runs: debug agent
+   → Tests: GraphQL schema changes
+
+2. backend/services/memory_service.py
+   → Runs: performance_optimizer
+   → Checks: Memory query performance
+
+3. backend/services/graph_service.py
+   → Runs: debug agent
+   → Tests: Neo4j operations
+
+4. backend/services/voyage_wrapper.py
+   → Runs: performance_optimizer
+   → Checks: Embeddings API costs
+
+5. cortex/agi_tools_mcp.py
+   → Runs: debug agent
+   → Validates: MCP tools
+
+6. backend/agents/**
+   → Runs: debug agent
+   → Tests: Agent implementations
+
+7. CLAUDE.md
+   → Runs: docs agent
+   → Verifies: Documentation
+
+8. frontend/src/**
+   → Runs: frontend agent
+   → Validates: TypeScript build
+
+
+PERFORMANCE:
+─────────────────────────────────────────────────────────────────
+
+Hook execution:    <200ms (you don't notice)
+Agent execution:   10-60s (in background)
+Impact on you:     ZERO (non-blocking)
+
+
+HOW TO ADD MORE RULES:
+─────────────────────────────────────────────────────────────────
+
+Edit: .claude/hooks/auto_trigger_agent.py
+
+Find: TRIGGER_RULES = {
+
+Add:
+  'your/file/path.py': {
+      'agent': 'debug',  # or: code, frontend, docs, etc.
+      'prompt': 'Your instruction here',
+      'reason': 'Why this matters'
+  },
+
+Test:
+  bash test_hook.sh
+
+
+MONITORING:
+─────────────────────────────────────────────────────────────────
+
+See all triggers logged:
+  tail .claude/hooks/.trigger_log
+
+Example log entry:
+  {
+    "timestamp": "2025-10-20T16:01:02",
+    "file": "backend/api/schema.py",
+    "agent": "debug",
+    "reason": "GraphQL schema modified"
+  }
+
+Monitor in real-time:
+  python3 .claude/hooks/monitor_triggers.py --follow
+
+
+TROUBLESHOOTING:
+─────────────────────────────────────────────────────────────────
+
+Q: Hook not triggering?
+A: Check file matches a rule (see THE 8 TRIGGER RULES above)
+
+Q: Agent not running?
+A: Check agents/team/reports/ directory
+
+Q: Want to disable a rule?
+A: Comment it out in TRIGGER_RULES dict
+
+Q: How do I know it's working?
+A: Edit a file + check monitor output or trigger logs
+
+
+KEY FILES:
+─────────────────────────────────────────────────────────────────
+
+auto_trigger_agent.py    ← Main hook (don't delete!)
+monitor_triggers.py      ← Monitoring tool
+test_hook.sh            ← Tests
+.trigger_log            ← Logs (auto-created)
+
+Documentation:
+  USAGE.md          ← Full usage guide
+  README.md         ← Overview
+  TECHNICAL.md      ← Deep dive
+  INDEX.md          ← File index
+  QUICKSTART.txt    ← This file
+
+
+CONFIGURATION:
+─────────────────────────────────────────────────────────────────
+
+Hook is configured in: .claude/settings.json
+
+Section: hooks.post-tool-use
+
+Entry: "name": "auto-trigger-agents"
+
+The hook automatically triggers on:
+- Edit operations
+- Write operations
+- Files matching matcher pattern
+
+
+NEXT STEPS:
+─────────────────────────────────────────────────────────────────
+
+1. Test: bash test_hook.sh
+
+2. Try it: Edit backend/api/schema.py
+
+3. Monitor: python3 monitor_triggers.py
+
+4. Customize: Add rules to TRIGGER_RULES
+
+
+SUPPORT:
+─────────────────────────────────────────────────────────────────
+
+Need help?
+→ Read: INDEX.md (file index)
+→ Read: TECHNICAL.md (deep dive)
+→ Read: USAGE.md (examples)
+
+Still stuck?
+→ Test: bash test_hook.sh
+→ Check: .trigger_log
+→ Debug: export CLAUDE_TOOL_NAME=Edit && python3 auto_trigger_agent.py
+
+
+═══════════════════════════════════════════════════════════════════
+
+Status: ✅ READY TO USE
+
+It's automatic. Just edit critical files and agents validate
+them in the background. No setup, no manual steps.
+
+Start here: bash test_hook.sh
+
+═══════════════════════════════════════════════════════════════════
+
+Created: 2025-10-20
+Version: 1.0

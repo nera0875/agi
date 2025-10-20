@@ -1,0 +1,67 @@
+{
+  "audit_date": "2025-10-20T16:24:45.242671",
+  "skills": {
+    "total": 13,
+    "categories": {
+      ".claude": 1,
+      "system": 3,
+      "skills": 2,
+      "00-system": 7
+    },
+    "size_kb": 80
+  },
+  "commands": {
+    "total": 5,
+    "list": [
+      "save",
+      "health",
+      "agents",
+      "optimize",
+      "audit"
+    ]
+  },
+  "hooks": {
+    "total": 12,
+    "list": [
+      "health_check",
+      "cascade_hook",
+      "auto_trigger_agent",
+      "test_precompact",
+      "optimize_hook",
+      "test_learn_hook",
+      "optimize_cli",
+      "cascade_example",
+      "learn_hook",
+      "monitor_triggers",
+      "cascade_monitor",
+      "test_optimize"
+    ]
+  },
+  "agents": {
+    "total": 9,
+    "list": [
+      "architect",
+      "code",
+      "ask",
+      "docs",
+      "sre",
+      "research",
+      "debug",
+      "meta",
+      "frontend"
+    ]
+  },
+  "claude_md": {
+    "lines": 850,
+    "bloated": false,
+    "recommendation": "OK"
+  },
+  "recommendations": [
+    {
+      "type": "consolidate",
+      "target": "hooks/",
+      "reason": "12 hooks (consolidate related)",
+      "action": "Group by domain (memory, agents, etc)"
+    }
+  ]
+}

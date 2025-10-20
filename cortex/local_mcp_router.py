@@ -21,7 +21,7 @@ MCP_CONFIGS = {
         "command": "node",
         "args": [str(MCP_SERVERS_DIR / "exa-mcp-server" / ".smithery" / "stdio" / "index.cjs")],
         "env": {
-            "EXA_API_KEY": "YOUR_EXA_API_KEY"  # À configurer
+            "EXA_API_KEY": "2957cbcf-2de9-434e-bc1a-0b16bd4d4bd1"
         }
     },
     "context7": {

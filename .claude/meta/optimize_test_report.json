@@ -1,0 +1,125 @@
+{
+  "timestamp": "2025-10-20T16:18:45.909023",
+  "statistics": {
+    "services": {
+      "total": 18,
+      "wrappers": 2,
+      "memory_services": 5,
+      "embeddings_services": 2
+    },
+    "agents": {
+      "total": 5,
+      "files": {
+        "frontend_director.py": 305,
+        "base_agent.py": 60,
+        "security_scanner.py": 170,
+        "frontend_manager.py": 773,
+        "test_security_scanner.py": 126
+      }
+    },
+    "routes": {
+      "memory.py": {
+        "lines": 136,
+        "endpoints": 0
+      },
+      "mcp.py": {
+        "lines": 479,
+        "endpoints": 0
+      }
+    },
+    "memory_tiers": {
+      "L1": [
+        "redis_client.py",
+        "redis_memory.py"
+      ],
+      "L2": [
+        "store_memory.py",
+        "memory_service.py"
+      ],
+      "L3": [
+        "graph_service.py",
+        "neo4j_memory.py"
+      ]
+    },
+    "naming_violations": 4,
+    "complexity_hotspots": 7
+  },
+  "recommendations": [
+    {
+      "priority": "MEDIUM",
+      "category": "consolidation",
+      "target": "backend/services/",
+      "issue": "Found 5 memory-related services",
+      "services": [
+        "store_memory.py",
+        "memory_service.py",
+        "neural_memory.py",
+        "neo4j_memory.py",
+        "redis_memory.py"
+      ],
+      "action": "Review for overlapping responsibilities (L1/L2/L3 tiers clear?)",
+      "impact": "Better separation of concerns"
+    },
+    {
+      "priority": "MEDIUM",
+      "category": "refactoring",
+      "target": "backend/services/",
+      "issue": "Found 6 large service files (>500 lines)",
+      "files": {
+        "store_memory.py": 603,
+        "memory_service.py": 1084,
+        "hybrid_search.py": 697,
+        "neural_memory.py": 629,
+        "neo4j_memory.py": 949,
+        "agent_service.py": 599
+      },
+      "action": "Split into focused modules (single responsibility)",
+      "impact": "Improved testability and maintainability"
+    },
+    {
+      "priority": "LOW",
+      "category": "conventions",
+      "target": "backend/services/",
+      "issue": "Found 4 naming convention violations",
+      "violations": [
+        "\u26a0\ufe0f neurotransmitter_system.py (unusual suffix)",
+        "\u26a0\ufe0f cohere_rerank.py (unusual suffix)",
+        "\u26a0\ufe0f hybrid_search.py (unusual suffix)",
+        "\u26a0\ufe0f human_brain.py (unusual suffix)"
+      ],
+      "action": "Standardize to: {domain}_{type}.py (e.g., memory_service.py)",
+      "impact": "Better code discoverability"
+    },
+    {
+      "priority": "MEDIUM",
+      "category": "refactoring",
+      "target": "backend/",
+      "issue": "Found 7 complexity hotspots",
+      "top_hotspots": [
+        {
+          "file": "backend/api/schema.py",
+          "lines": 1766,
+          "classes": 36,
+          "functions": 41,
+          "score": 148.3
+        },
+        {
+          "file": "backend/api/agi_schema.py",
+          "lines": 790,
+          "classes": 11,
+          "functions": 13,
+          "score": 50.8
+        },
+        {
+          "file": "backend/services/neo4j_memory.py",
+          "lines": 949,
+          "classes": 3,
+          "functions": 24,
+          "score": 49.0
+        }
+      ],
+      "action": "Prioritize refactoring top files into smaller modules",
+      "impact": "Better testability, easier debugging"
+    }
+  ]
+}

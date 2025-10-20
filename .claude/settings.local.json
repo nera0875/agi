@@ -43,5 +43,71 @@
     "smithery-ai-fetch",
     "exa",
     "agi-tools"
-  ]
+  ],
+  "hooks": {
+    "user-prompt-submit": [
+      {
+        "type": "command",
+        "command": "python3 /home/pilote/projet/agi/cortex/hooks/capture_user_message.py \"$CLAUDE_USER_PROMPT\""
+      }
+    ],
+    "post-tool-use": [
+      {
+        "matcher": "mcp__exa__web_search_exa",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 /home/pilote/projet/agi/cortex/hooks/store_tool_learning.py \"exa\" '$TOOL_RESULT'"
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__upstash-context-7-mcp__get-library-docs",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 /home/pilote/projet/agi/cortex/hooks/store_tool_learning.py \"context7\" '$TOOL_RESULT'"
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__agi-tools__database",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 /home/pilote/projet/agi/cortex/hooks/store_tool_learning.py \"database\" '$TOOL_RESULT'"
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__agi-tools__memory",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 /home/pilote/projet/agi/cortex/hooks/store_tool_learning.py \"memory\" '$TOOL_RESULT'"
+          }
+        ]
+      },
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 /home/pilote/projet/agi/cortex/hooks/log_neo4j_event.py \"$TOOL_NAME\" \"\" \"$CLAUDE_SESSION_ID\""
+          }
+        ]
+      }
+    ],
+    "pre-compact": [
+      {
+        "type": "command",
+        "command": "python3 /home/pilote/projet/agi/cortex/hooks/pre_compact_consolidation.py",
+        "description": "Quick memory consolidation before context compact"
+      },
+      {
+        "type": "command",
+        "command": "python3 /home/pilote/projet/agi/cortex/hooks/consolidate_conversation.py '$CONVERSATION'"
+      }
+    ]
+  }
 }
