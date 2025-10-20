@@ -10,11 +10,16 @@ import asyncpg
 from typing import List, Dict, Optional
 import logging
 import json
+import os
+from dotenv import load_dotenv
 
 logger = logging.getLogger(__name__)
 
+# Load .env file for API keys
+load_dotenv()
+
 # Cohere Config
-COHERE_API_KEY = "TkkNADrL73TjYBwD6c4jNi3jRvL4h5PbslZ8W7C8"  # Depuis .env
+COHERE_API_KEY = os.getenv("COHERE_API_KEY", "")
 COHERE_API_URL = "https://api.cohere.com/v2/rerank"
 COHERE_MODEL = "rerank-v3.5"
 
