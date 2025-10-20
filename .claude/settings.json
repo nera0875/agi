@@ -114,6 +114,17 @@
             "timeout": 2
           }
         ]
+      },
+      {
+        "name": "auto-rollback-on-test-fail",
+        "matcher": "Edit:backend/services/**|Edit:backend/api/schema.py|Edit:backend/routes/**|Edit:backend/agents/**|Edit:cortex/agi_tools_mcp.py|Edit:cortex/local_mcp_router.py|Write:backend/services/**|Write:backend/api/schema.py|Write:backend/routes/**|Write:backend/agents/**|Write:cortex/agi_tools_mcp.py|Write:cortex/local_mcp_router.py",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd /home/pilote/projet/agi && CLAUDE_FILE_PATH='$MODIFIED_FILE' python3 .claude/hooks/auto_rollback_on_test_fail.py",
+            "timeout": 120
+          }
+        ]
       }
     ],
     "pre-compact": [
