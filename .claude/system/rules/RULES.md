@@ -985,6 +985,38 @@ else:
 - Si déjà chargé = pas besoin
 - Si conversation compactée/redémarre = recharger
 
+### ⚠️ Enforcement Automatique (CRITIQUE)
+
+**RÈGLE ABSOLUTE : Détecter si mémoire chargée AVANT toute action**
+
+```python
+# Au PREMIER message user (quelconque)
+if "/data-load" NOT in conversation_history:
+    # REFUSER toute action
+    Response: """
+    ⚠️ MÉMOIRE NON CHARGÉE
+
+    Risque : Doublons, boucles, re-débats inutiles
+
+    ACTION REQUISE : Lance /data-load d'abord
+
+    Ensuite je pourrai :
+    - Vérifier agents/skills existants
+    - Rappeler décisions passées
+    - Éviter refaire ce qui existe
+    """
+    # STOP - attendre /data-load user
+else:
+    # Mémoire chargée ✅ → continuer normalement
+```
+
+**Exceptions UNIQUES (actions autorisées sans /data-load)** :
+- User tape `/data-load` lui-même → exécuter
+- User demande "comment charger mémoire ?" → expliquer
+- User dit "juste pour tester" → warning mais continuer
+
+**Pour TOUT le reste** : Refus poli + demande /data-load.
+
 ### Workflow Mémoire Intelligent
 
 **Phase 1 : Load (1er message)**
