@@ -1,0 +1,33 @@
+Loading embedding model...
+=== Context Optimizer Started ===
+
+Backup created: /home/pilote/projet/primaire/AGI/.claude/scripts/python/backups/context_20251026_214814.json
+Loaded 1495 entries
+Embedding 1495 entries...
+Clustering with eps=0.5...
+Found 9 clusters (including outliers)
+  outliers: 1465 entries
+  cluster 0: 2 entries
+  cluster 1: 6 entries
+  cluster 2: 6 entries
+  cluster 3: 6 entries
+  cluster 4: 2 entries
+  cluster 5: 4 entries
+  cluster 6: 2 entries
+  cluster 7: 2 entries
+  Cluster 0: 2 → 1 entries
+  Cluster 1: 6 → 1 entries
+  Cluster 2: 6 → 1 entries
+  Cluster 3: 6 → 1 entries
+  Cluster 4: 2 → 1 entries
+  Cluster 5: 4 → 1 entries
+  Cluster 6: 2 → 1 entries
+  Cluster 7: 2 → 1 entries
+
+Building graph relations...
+
+=== Optimization Complete ===
+Original: 1495 entries
+Optimized: 1473 entries
+Compression: 1.01x
+Output: /home/pilote/projet/primaire/AGI/.claude/context-optimized.json

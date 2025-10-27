@@ -1,0 +1,45 @@
+{
+  "version": "1.0.0",
+  "last_update": "2025-10-26T14:30:00Z",
+  "vision": {
+    "horizon": "10 years",
+    "target": "Milliardaire ($1B net worth)",
+    "freedom": "Liberte financiere totale",
+    "impact": "Produit utilise millions users"
+  },
+  "goals_annual": [
+    {
+      "year": 1,
+      "revenue_target": "$500K",
+      "skills": ["Expert AI", "Pentest avance", "Business fundamentals"],
+      "network": "50 contacts high-value"
+    },
+    {
+      "year": 3,
+      "revenue_target": "$5M",
+      "skills": ["AI research", "Security architecture", "Leadership"],
+      "network": "100 contacts high-value"
+    }
+  ],
+  "milestones_quarterly": [
+    {
+      "quarter": "Q1-2025",
+      "goals": [
+        "MVP product ready",
+        "First 10 beta users",
+        "Revenue model validated"
+      ]
+    }
+  ],
+  "tasks_weekly": [],
+  "progress": {
+    "current_revenue": "$0",
+    "velocity_tasks_week": 0,
+    "blockers": []
+  },
+  "setup_completed": {
+    "timestamp": "2025-10-26T14:30:00Z",
+    "mode": "SETUP",
+    "gate_status": "pending"
+  }
+}

@@ -1,0 +1,23 @@
+Loading embedding model...
+=== Context Cleaner Started ===
+
+Backup: /home/pilote/projet/primaire/AGI/.claude/scripts/python/backups/context_raw_20251026_215027.json
+Loaded 1495 raw entries
+Filtered: 1495 → 666 meaningful entries
+Embedding 666 entries...
+Clustering with eps=0.6...
+Found 4 clusters
+  outliers: 648 entries
+  cluster 0: 6 entries
+  cluster 1: 6 entries
+  cluster 2: 6 entries
+  Cluster 0: 6 → 1 entries
+  Cluster 1: 6 → 1 entries
+  Cluster 2: 6 → 1 entries
+
+=== Cleaning Complete ===
+Raw: 1495 entries
+Meaningful: 666 entries
+Clean: 651 entries
+Compression: 2.30x
+Output: /home/pilote/projet/primaire/AGI/.claude/context-clean.json

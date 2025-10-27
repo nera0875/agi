@@ -1,0 +1,149 @@
+{
+  "version": "1.0.0",
+  "last_update": "2025-10-25T19:37:05.770440",
+  "projects": {
+    "GOALS": {
+      "id": "goals",
+      "name": "GOALS",
+      "color": "#10B981",
+      "view_mode": "list",
+      "tasks": [
+        {
+          "id": "task-1",
+          "title": "Complete Task Manager AGI MVP",
+          "priority": "high",
+          "completed": false,
+          "created_at": "2024-01-15T09:00:00.000Z",
+          "updated_at": "2024-01-15T09:00:00.000Z",
+          "subtasks": [
+            {
+              "id": "subtask-1",
+              "title": "Design UI/UX wireframes",
+              "completed": true,
+              "created_at": "2024-01-15T09:00:00.000Z"
+            },
+            {
+              "id": "subtask-2",
+              "title": "Implement frontend components",
+              "completed": false,
+              "created_at": "2024-01-15T09:00:00.000Z"
+            }
+          ],
+          "items": [
+            {
+              "id": "item-1",
+              "text": "Setup project structure",
+              "completed": true,
+              "created_at": "2024-01-15T09:00:00.000Z"
+            },
+            {
+              "id": "item-2",
+              "text": "Configure TypeScript",
+              "completed": true,
+              "created_at": "2024-01-15T09:00:00.000Z"
+            }
+          ]
+        },
+        {
+          "id": "task-5",
+          "title": "Test new task",
+          "priority": "high",
+          "completed": false,
+          "created_at": "2025-10-25T19:37:05.770346",
+          "updated_at": "2025-10-25T19:37:05.770361",
+          "subtasks": [],
+          "items": []
+        }
+      ]
+    },
+    "CODE": {
+      "id": "code",
+      "name": "CODE",
+      "color": "#3B82F6",
+      "view_mode": "list",
+      "tasks": [
+        {
+          "id": "task-2",
+          "title": "Implement FastAPI backend",
+          "priority": "high",
+          "completed": false,
+          "created_at": "2024-01-15T09:15:00.000Z",
+          "updated_at": "2024-01-15T09:15:00.000Z",
+          "subtasks": [
+            {
+              "id": "subtask-3",
+              "title": "Create API routes",
+              "completed": false,
+              "created_at": "2024-01-15T09:15:00.000Z"
+            }
+          ],
+          "items": [
+            {
+              "id": "item-3",
+              "text": "Setup FastAPI project",
+              "completed": false,
+              "created_at": "2024-01-15T09:15:00.000Z"
+            }
+          ]
+        }
+      ]
+    },
+    "PENTEST": {
+      "id": "pentest",
+      "name": "PENTEST",
+      "color": "#EF4444",
+      "view_mode": "list",
+      "tasks": [
+        {
+          "id": "task-3",
+          "title": "Security audit of API endpoints",
+          "priority": "medium",
+          "completed": false,
+          "created_at": "2024-01-15T09:30:00.000Z",
+          "updated_at": "2024-01-15T09:30:00.000Z",
+          "subtasks": [],
+          "items": [
+            {
+              "id": "item-4",
+              "text": "Check input validation",
+              "completed": false,
+              "created_at": "2024-01-15T09:30:00.000Z"
+            }
+          ]
+        }
+      ]
+    },
+    "BRAIN": {
+      "id": "brain",
+      "name": "BRAIN",
+      "color": "#8B5CF6",
+      "view_mode": "list",
+      "tasks": [
+        {
+          "id": "task-4",
+          "title": "Research drag & drop libraries",
+          "priority": "low",
+          "completed": true,
+          "created_at": "2024-01-15T08:00:00.000Z",
+          "updated_at": "2024-01-15T10:00:00.000Z",
+          "subtasks": [
+            {
+              "id": "subtask-4",
+              "title": "Compare @dnd-kit vs react-dnd",
+              "completed": true,
+              "created_at": "2024-01-15T08:00:00.000Z"
+            }
+          ],
+          "items": [
+            {
+              "id": "item-5",
+              "text": "Document findings",
+              "completed": true,
+              "created_at": "2024-01-15T08:00:00.000Z"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

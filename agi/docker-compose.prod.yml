@@ -1,0 +1,82 @@
+version: '3.8'
+
+services:
+  agi-backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile.prod
+    environment:
+      # Cloud Database Connections
+      DATABASE_URL: ${CLOUD_DATABASE_URL}  # AWS RDS PostgreSQL
+      NEO4J_URL: ${CLOUD_NEO4J_URL}       # Neo4j Aura
+      REDIS_URL: ${CLOUD_REDIS_URL}       # Redis Cloud
+      
+      # External Services
+      VOYAGE_API_KEY: ${VOYAGE_API_KEY}
+      COHERE_API_KEY: ${COHERE_API_KEY}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      
+      # Production Config
+      ENVIRONMENT: production
+      LOG_LEVEL: WARNING
+      CORS_ORIGINS: ${FRONTEND_DOMAIN}
+      SECRET_KEY: ${SECRET_KEY}
+    ports:
+      - "8000:8000"
+    deploy:
+      replicas: 3
+      resources:
+        limits:
+          cpus: '2'
+          memory: 4G
+        reservations:
+          cpus: '1'
+          memory: 2G
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  agi-frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+    environment:
+      REACT_APP_API_URL: ${BACKEND_URL}
+      REACT_APP_ENVIRONMENT: production
+    ports:
+      - "3000:3000"
+    depends_on:
+      - agi-backend
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          cpus: '1'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 1G
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  default:
+    name: agi_network_prod

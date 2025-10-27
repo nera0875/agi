@@ -1,0 +1,116 @@
+{
+  "version": "1.0.0",
+  "description": "Meta-définition structure projets - définit fichiers à créer, schemas, routing, phases",
+
+  "default_structure": {
+    ".plan/requirements.md": {
+      "format": "markdown",
+      "sections": ["## Objectif", "## Contraintes", "## Livrables"],
+      "required": true
+    },
+    ".plan/architecture.md": {
+      "format": "markdown",
+      "sections": ["## Overview", "## Components", "## Data Flow"],
+      "required": true
+    },
+    ".plan/tasks.md": {
+      "format": "markdown",
+      "pattern": "- [ ] task description",
+      "required": true
+    },
+    ".plan/state.json": {
+      "format": "json",
+      "schema": {
+        "type": "object",
+        "required": ["project_id", "timestamp", "current_phase"],
+        "properties": {
+          "project_id": {"type": "string"},
+          "timestamp": {"type": "string", "format": "date-time"},
+          "current_phase": {
+            "type": "object",
+            "required": ["id", "name", "status"],
+            "properties": {
+              "id": {"type": "integer"},
+              "name": {"type": "string"},
+              "status": {"enum": ["pending", "in_progress", "completed"]},
+              "progress_percent": {"type": "integer", "minimum": 0, "maximum": 100}
+            }
+          },
+          "blockers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["type", "name", "status"],
+              "properties": {
+                "type": {"enum": ["gate", "technical", "resource"]},
+                "name": {"type": "string"},
+                "status": {"enum": ["pending", "resolved"]},
+                "message": {"type": "string"}
+              }
+            }
+          },
+          "agents_history": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["agent", "phase", "timestamp", "action"],
+              "properties": {
+                "agent": {"type": "string"},
+                "phase": {"type": "integer"},
+                "timestamp": {"type": "string", "format": "date-time"},
+                "action": {"type": "string"},
+                "outputs": {"type": "array", "items": {"type": "string"}}
+              }
+            }
+          },
+          "next_action": {
+            "type": "object",
+            "properties": {
+              "agent": {"type": "string"},
+              "description": {"type": "string"}
+            }
+          }
+        }
+      },
+      "required": true
+    }
+  },
+
+  "default_phases": [
+    {
+      "id": 1,
+      "name": "planning",
+      "description": "Analyse requirements, architecture design",
+      "agents": ["constructor", "advisor"]
+    },
+    {
+      "id": 2,
+      "name": "implementation",
+      "description": "Code development, tests",
+      "agents": ["executor"]
+    },
+    {
+      "id": 3,
+      "name": "validation",
+      "description": "Tests, validation finale",
+      "agents": ["executor", "advisor"]
+    }
+  ],
+
+  "routing": {
+    "phase_transitions": {
+      "planning": {
+        "next": "implementation",
+        "gates": ["user_approval_architecture"]
+      },
+      "implementation": {
+        "next": "validation",
+        "gates": []
+      },
+      "validation": {
+        "next": "completed",
+        "gates": ["tests_passed"]
+      }
+    }
+  }
+}

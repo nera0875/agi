@@ -1,0 +1,23 @@
+Les outils que Claude Code me donne :
+
+  Tools disponibles (liste complète) :
+
+  1. Task - Lancer agents/subagents
+  2. Bash - Commandes terminal
+  3. Glob - Chercher fichiers par pattern
+  4. Grep - Chercher contenu dans fichiers
+  5. Read - Lire fichiers
+  6. Write - Créer fichiers
+  7. Edit - Modifier fichiers
+  8. NotebookEdit - Éditer Jupyter notebooks
+  9. WebFetch - Fetch URLs et analyser
+  10. WebSearch - Recherche web
+  11. TodoWrite - Gérer todo list
+  12. AskUserQuestion - Poser questions user
+  13. Skill - Charger skills (MCP ou custom)
+  14. SlashCommand - Exécuter slash commands custom
+  15. BashOutput - Lire output bash background
+  16. KillShell - Tuer shell background
+  17. ListMcpResourcesTool - Lister ressources MCP
+  18. ReadMcpResourceTool - Lire ressources MCP
+  19. mcp__ticktick__* - 20+ tools TickTick MCP

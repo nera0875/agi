@@ -1,0 +1,22 @@
+# Secrets et données sensibles
+.claude/context.json
+.claude/data/brain/context.json
+.claude/scripts/python/backups/
+agi/.env
+
+# Logs
+.claude/scripts/python/*.log
+
+# Python
+__pycache__/
+*.pyc
+venv/
+agi/venv/
+
+# Node
+node_modules/
+.vite/
+
+# IDE
+.vscode/
+.idea/

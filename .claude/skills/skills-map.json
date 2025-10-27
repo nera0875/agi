@@ -1,0 +1,104 @@
+{
+  "version": "1.0.0",
+  "last_updated": "2025-10-26",
+  "total_skills": 37,
+  "categories": {
+    "core": {
+      "description": "Skills système fondamentaux - orchestration, validation, contexte",
+      "count": 6,
+      "skills": {
+        "context": "Patterns contextualisation - quelles infos stocker, format, quand mettre à jour",
+        "manifest-builder": "Génère plugin.json - manifest complet avec tous composants",
+        "project-strict-workflow": "Workflow création projet avec validation stricte + CEO fix automatique",
+        "strict-validation": "Validation schemas JSON - patterns erreurs + fix loop proactif",
+        "workflow-orchestration": "Routing intelligent via templates + state.json - détermine phase/agent automatiquement",
+        "yaml-conventions": "Format YAML strict - ISO 8601, kebab-case, null handling"
+      }
+    },
+    "orchestration": {
+      "description": "Skills routage phases et état dynamique des projets",
+      "count": 6,
+      "skills": {
+        "deployment-orchestration": "Complete reference for Docker, CI/CD, environment config, logging/monitoring, database migrations",
+        "git-tracker": "Track fichiers créés/modifiés pour state.json",
+        "phase-router": "Routing phases - mapping phase status to next agent",
+        "routing-guide": "How intelligent routing works - state-based agent selection",
+        "state-manager": "Update .plan/state.json avec état courant",
+        "workflow-guide": "How to use project workflow - phases and progression"
+      }
+    },
+    "validation": {
+      "description": "Skills validation architecture, code et progress tracking",
+      "count": 3,
+      "skills": {
+        "architecture-validator": "Valide structure architecture.md - agents/skills/commands définition",
+        "code-validator": "Valide agents/skills/commands - tailles et structure",
+        "progress-tracker": "Calcule progress % et détecte blocages stagnation"
+      }
+    },
+    "patterns": {
+      "description": "Skills patterns technologiques - frameworks et conventions",
+      "count": 5,
+      "skills": {
+        "backend-config-patterns": "Environment variables, database async connections, structured logging, Docker containerization patterns",
+        "frontend-testing-patterns": "Jest setup, React Testing Library patterns, component unit tests, E2E testing with Cypress/Playwright",
+        "python-fastapi-conventions": "FastAPI routing structure, Pydantic models, error handling, project layout patterns for backend implementations",
+        "react-frontend-patterns": "Complete reference for React 18, TypeScript, Hooks, state management, testing",
+        "react-typescript-conventions": "React functional components, TypeScript strict mode, folder structure, hooks patterns, state management"
+      }
+    },
+    "guides": {
+      "description": "Skills guides et analyse - besoins, standards, conventions",
+      "count": 4,
+      "skills": {
+        "code-standards": "Pattern standards code - naming, structure, best practices",
+        "conventions-guide": "Plugin conventions - naming, structure, size limits",
+        "requirements-analysis": "Pattern analyse besoins - user stories, acceptance criteria, constraints, success metrics",
+        "requirements-analyzer": "Parse requirements.md - extract agents/skills/commands needed"
+      }
+    },
+    "productivity": {
+      "description": "Skills optimisation productivité TSA/HPI - temps, énergie, objectifs",
+      "count": 4,
+      "skills": {
+        "energy-mapper": "Analyse patterns énergie HPI - pics, creux, burnout prevention",
+        "goal-tracker": "Track roadmap milliardaire - milestones, progress %, blockers detection",
+        "goals-planning": "Vision→Goals→Milestones→Tasks breakdown milliardaire",
+        "time-optimizer": "Optimisation time blocks TSA/HPI - Deep Work, Pomodoro, energy-aware scheduling"
+      }
+    },
+    "claude": {
+      "description": "Documentation Claude Code officielle - plugins, hooks, workflows, outputs",
+      "count": 8,
+      "skills": {
+        "claude-hooks": "Complete guide to Claude Code hooks - PreToolUse, PostToolUse, and lifecycle events",
+        "claude-skills": "Complete reference for Claude Code skills - creation, usage patterns, and best practices",
+        "common-workflows": "Common workflows and patterns for Claude Code usage - productivity best practices",
+        "docs-map": "Complete Claude Code documentation map - 44 pages organized by category",
+        "headless": "Claude Code Headless Mode - Automation sans interface graphique",
+        "output-styles": "Guide complet des styles de sortie Claude Code - styles natifs, configuration, création custom",
+        "plugins": "Documentation complète plugins Claude Code - structure, manifest, installation, patterns",
+        "sub-agents": "Complete guide to creating and using specialized AI subagents in Claude Code for task-specific workflows and context management"
+      }
+    },
+    "claude-mcp": {
+      "description": "Integration Model Context Protocol - MCP servers et configuration",
+      "count": 1,
+      "skills": {
+        "claude-mcp": "Model Context Protocol - MCP servers integration, configuration, and management for Claude Code"
+      }
+    }
+  },
+  "usage": {
+    "by_type": {
+      "implementation": "Skills avec logique exécutable - Skill('context') pour charger, Skill('workflow-orchestration') pour router",
+      "documentation": "Skills de référence - lire via Read() ou intégrer dans prompts agents"
+    },
+    "common_patterns": {
+      "memory_load": "Skill('context') ou Task('writor', 'MODE: LOAD')",
+      "project_routing": "Skill('workflow-orchestration') → Skill('project-strict-workflow') pour phases",
+      "plugin_creation": "Skill('plugin-creation') → Skill('plugin-validation')",
+      "validation": "Skill('strict-validation') → Skill('code-validator') → Skill('architecture-validator')"
+    }
+  }
+}

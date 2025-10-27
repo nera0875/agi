@@ -1,0 +1,38 @@
+# FastAPI Core
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+pydantic==2.8.2
+pydantic-settings==2.4.0
+
+# Database
+asyncpg==0.29.0
+sqlalchemy==2.0.23
+alembic==1.13.1
+psycopg2-binary==2.9.9
+
+# Vector Database
+pgvector==0.2.4
+
+# Neo4j
+neo4j==5.15.0
+
+# Redis
+redis==5.0.1
+
+# HTTP Client
+httpx==0.25.2
+
+# Authentication & Security
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+python-multipart==0.0.6
+PyJWT==2.8.0
+
+# Utilities
+python-dotenv==1.0.0
+structlog==23.2.0
+tenacity==8.2.3
+
+# Vector Operations
+numpy==1.24.3
+faiss-cpu==1.7.4

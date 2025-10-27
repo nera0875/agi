@@ -1,0 +1,63 @@
+{
+  "version": "1.0.0",
+  "last_sync": "2025-10-26T14:30:00Z",
+  "schedule": "Optimal TSA/HPI time-blocks",
+  "timezone": "Europe/Paris",
+  "weekdays": {
+    "monday": {
+      "blocks": [
+        {
+          "time_start": "07:00",
+          "time_end": "08:30",
+          "type": "deep-work",
+          "duration_minutes": 90,
+          "focus": "peak-1",
+          "task_category": "critical"
+        },
+        {
+          "time_start": "08:30",
+          "time_end": "09:00",
+          "type": "pause",
+          "duration_minutes": 30,
+          "focus": "recovery"
+        },
+        {
+          "time_start": "15:00",
+          "time_end": "16:30",
+          "type": "deep-work",
+          "duration_minutes": 90,
+          "focus": "peak-2",
+          "task_category": "creative"
+        }
+      ]
+    },
+    "tuesday": {
+      "blocks": [
+        {
+          "time_start": "07:00",
+          "time_end": "08:30",
+          "type": "deep-work",
+          "duration_minutes": 90,
+          "focus": "peak-1",
+          "task_category": "critical"
+        },
+        {
+          "time_start": "08:30",
+          "time_end": "09:00",
+          "type": "pause",
+          "duration_minutes": 30,
+          "focus": "recovery"
+        },
+        {
+          "time_start": "15:00",
+          "time_end": "16:30",
+          "type": "deep-work",
+          "duration_minutes": 90,
+          "focus": "peak-2",
+          "task_category": "creative"
+        }
+      ]
+    }
+  },
+  "notes": "Schedule respecte contraintes TSA (switching cost 15-20min) - pics énergie 7-10h et 15-17h"
+}
