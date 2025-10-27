@@ -900,14 +900,19 @@ Task(executor, "Read file10.py") # Agent 10
 # AVANT créer agent/skill/command/file
 CHECKLIST OBLIGATOIRE:
 
-□ 1. VÉRIFIER EXISTANT
+□ 1. VÉRIFIER EXISTANT (AUTOMATIQUE via skill)
+   Skill("pre-creation-check").verify("{nom}", "{type}")
+
+   OU si skill pas disponible:
    Task(executor, """
-   Glob .claude/agents/{nom}.md
-   Glob .claude/skills/**/{nom}.md
-   Glob .claude/commands/{nom}.md
+   Glob .claude/{type}/**/{nom}.md
    Grep context.json "{nom}.*créé|création.*{nom}"
 
-   RETURN: exists=true|false, path="..."
+   RETURN JSON: {
+     "exists": true|false,
+     "path": "..." ou null,
+     "action": "REUSE|MODIFY|CREATE"
+   }
    """)
 
 □ 2. SI EXISTE → LIRE + ANALYSER
@@ -937,6 +942,36 @@ CHECKLIST OBLIGATOIRE:
 - Context.json incohérent (pas tracé)
 
 **Discipline = Checklist AVANT action, pas réaction APRÈS problème.**
+
+---
+
+### 🎯 Skill Pre-Creation-Check (Recommandé)
+
+**Si skill existe** : `Skill("pre-creation-check")` centralise vérification
+**Si skill absent** : Task(executor) avec Glob + Grep manuel
+
+**Workflow automatique** :
+
+```python
+# Avant créer agent/skill/command
+result = Skill("pre-creation-check").verify("tech-lead", "agent")
+
+if result["exists"]:
+    if result["action"] == "REUSE":
+        # Utiliser existant
+        return result["path"]
+    elif result["action"] == "MODIFY":
+        # Modifier existant
+        Task(executor, f"Edit {result['path']} - ajouter X")
+else:
+    # Créer nouveau
+    Task(executor, "Create .claude/agents/tech-lead.md")
+```
+
+**OBLIGATION CEO** : JAMAIS skip étape 1, même pour "créations rapides"
+- Pre-check = 5 secondes
+- Doublon création = 20 minutes debug
+- Ratio : Always check before create
 
 ---
 
