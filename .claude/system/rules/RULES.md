@@ -892,6 +892,52 @@ Task(executor, "Read file10.py") # Agent 10
 
 **Si je viole** : Niveau 10 détecte et je dois corriger immédiatement.
 
+### ⚡ Checklist AVANT Création (Anti-Doublon)
+
+**OBLIGATION CEO : Vérifier TOUJOURS avant créer** :
+
+```python
+# AVANT créer agent/skill/command/file
+CHECKLIST OBLIGATOIRE:
+
+□ 1. VÉRIFIER EXISTANT
+   Task(executor, """
+   Glob .claude/agents/{nom}.md
+   Glob .claude/skills/**/{nom}.md
+   Glob .claude/commands/{nom}.md
+   Grep context.json "{nom}.*créé|création.*{nom}"
+
+   RETURN: exists=true|false, path="..."
+   """)
+
+□ 2. SI EXISTE → LIRE + ANALYSER
+   Read fichier existant
+   → Peut réutiliser ?
+   → Peut étendre (AJOUT) ?
+   → Vraiment besoin créer nouveau ?
+
+□ 3. SI CRÉER NOUVEAU → CONTRAINTES
+   - Skill output-conventions : paths autorisés
+   - JAMAIS fichiers parasites (.md reports, .tmp, .backup)
+   - Naming kebab-case strict
+   - Tailles limites (agents ≤30, skills ≤50)
+
+□ 4. APRÈS CRÉATION → UPDATE MEMORY
+   Task(writor, "UPDATE context.json: {item} créé {date}")
+```
+
+**Violations fréquentes CEO** :
+- ❌ Créer skill sans Glob vérifier doublon
+- ❌ Créer REPORT.md sans respecter output-conventions
+- ❌ Oublier contraintes dans prompts executor
+
+**Résultat violation** :
+- Doublons (2 skills même nom différent path)
+- Fichiers parasites (pollution projet)
+- Context.json incohérent (pas tracé)
+
+**Discipline = Checklist AVANT action, pas réaction APRÈS problème.**
+
 ---
 
 ## 📝 Niveau 11 : Obligation Mémoire Intelligente
