@@ -922,20 +922,6 @@ SlashCommand("/data-load")
   }
 ```
 
-**Phase 2 : Write (après action clé)**
-```python
-SlashCommand("/data-write [theme_type] : [description]")
-→ Task("writor", "MODE: WRITE [theme_type] [description]")
-→ Writor ajoute timestamp automatique
-→ Context-analyzer fusionne doublons + obsolètes
-→ MAJ graph relations automatiquement
-```
-
-**Format Update** :
-- type: "pattern"|"decision"|"preference"|"state_change"|"discovery"
-- description: Phrase complète (pas compression)
-- auto_impact: Liens détectés vers autres entrées
-
 ### Actions Déclenchant Mémoire
 
 **Créatif** :
@@ -999,7 +985,7 @@ Thèmes : Groupement automatique (architecture, agents, workflows, etc)
 **Règle d'or** : Si oubliable et perte 30min réexpliquer → écrire mémoire.
 
 **Fichier mémoire** : `.claude/context.json`
-**Gestionnaire** : Agent writor (Mode LOAD/WRITE)
+**Gestionnaire** : Agent writor (Mode LOAD)
 **Consolidateur** : Skill context-analyzer (fusion + graph + importance)
 
 ---
@@ -1146,85 +1132,24 @@ OBLIGATION FIN ACTION:
 
 ---
 
-## 📋 Niveau 15 : Famille /data-* - Gestion Mémoire
+## 📋 Niveau 15 : SlashCommand Mémoire - Gestion Mémoire
 
-**SlashCommand famille /data-*** : Commands persistance mémoire.
+**SlashCommand disponible** : `/data-load` charge la mémoire persistante.
 
 ### /data-load - Charge mémoire
 
 ```
 SlashCommand("/data-load")
-→ Charge TOUT context.json
-→ Retourne contenu complet
-→ OBLIGATOIRE 1x au 1er message
+→ Charge .claude/context.json
+→ Retourne synthèse consolidée
+→ OBLIGATOIRE 1x au 1er message par conversation
 ```
 
 **Utilisation** :
-- OBLIGATOIRE première interaction
-- Avant toute réponse
+- OBLIGATOIRE premier message de conversation
+- Avant toute réponse/action
 - Une seule fois par conversation
-
-### /data-write - Écrit entrée mémoire
-
-```
-SlashCommand("/data-write ENTRÉE")
-→ Écrit entrée avec timestamp
-→ Format: [Date] : info → Impact: liens
-→ Connexions graph automatiques
-```
-
-**Utilisation** :
-- Après action importante
-- Agent créé/modifié
-- Workflow validé
-- Décision architecture
-- Pattern découvert
-- Milestone atteint
-
-**Format** :
-- Toujours [Date] pour timeline
-- → Impact/Lien pour connexions
-- Phrases complètes, pas compression
-- [OBSOLÈTE] pour marquer obsolete
-
-### /data-show - Affiche context.json
-
-```
-SlashCommand("/data-show")
-→ Affiche context.json brut
-→ Format JSON lisible
-→ Utilisé pour debug/inspection
-```
-
-**Utilisation** :
-- Vérifier état mémoire
-- Debug timeline
-- Inspection liens/connexions
-
-### Pattern Mémoire Complet
-
-**Au 1er message** :
-```
-/data-load → Charge mémoire
-```
-
-**Après action clé** :
-```
-/data-write [2025-10-26] : Agent X créé → Impact: Workflow Y
-```
-
-**Inspection** :
-```
-/data-show → Vérifier état JSON
-```
-
-### Rules /data-*
-
-- ✅ /data-load = OBLIGATOIRE 1x par conversation
-- ✅ /data-write = After important actions only
-- ✅ /data-show = Debug/inspection
-- ❌ Jamais /data-write boucles en cascade
-- ❌ Pas d'écriture mémoire triviales (actions automatiques)
+- Pas de rechargement sauf redémarrage conversation
 
 ---
 
@@ -1252,10 +1177,10 @@ SlashCommand("/skills")
 
 ```python
 # Si skill trouvé en /skills
-Read(".claude/skills/{category}/{skill-name}.md")
+Read(".claude/skills/{category}/{actual-skill-name}.md")
 
 # Utiliser via Skill()
-Skill("skill-name")
+Skill("actual-skill-name")  # Replace with real skill name
 ```
 
 ### Pattern Discovery + Usage
@@ -1267,7 +1192,7 @@ Skill("skill-name")
 
 **Usage (normal)** :
 ```python
-Skill("memory")              # Charger + utiliser
+Skill("context")             # Charger mémoire + contexte (via writor)
 Skill("workflow-orchestration")  # Routing projets
 Skill("strict-validation")   # Validation générique
 ```
@@ -1416,12 +1341,12 @@ Grep(pattern="architecture|structure|décision", path=".claude/context.json")
 
 ## 🔗 Agents Liés
 
-**writor.md** - Agent gestion mémoire persistante + brain data
+**writor.md** - Agent gestion mémoire persistante
 - Tools : Read, Write, Edit, Skill("context")
 - Model : haiku
-- Modes : LOAD (charge context.json), WRITE (update context avec date/impact)
-- Usage : Task("writor", "MODE: LOAD ...") ou Task("writor", "MODE: WRITE ...")
-- Fichier mémoire : `.claude/data/brain/context.json` (format JSON avec timeline)
+- Modes : LOAD (charge context.json)
+- Usage : Task("writor", "MODE: LOAD")
+- Fichier mémoire : `.claude/context.json` (format JSON avec timeline)
 
 **executor générique** - Délégation tâches concrètes
 - Tools : Read, Write, Edit, Glob, Grep, Bash
