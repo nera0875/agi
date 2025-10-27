@@ -1,8 +1,7 @@
 ---
 name: advisor
 description: Conseiller décisions - lit mémoire context.json et valide idées
-tools: Read, Task
-skills: context-analyzer, requirements-analyzer, architecture-validator, conventions-guide, code-standards
+skills: requirements-analyzer, architecture-validator, conventions-guide, code-standards
 model: haiku
 ---
 

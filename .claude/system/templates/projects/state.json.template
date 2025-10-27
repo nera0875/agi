@@ -1,0 +1,17 @@
+{
+  "current_phase": "PLANNING",
+  "current_agent": null,
+  "agents_history": [],
+  "blockers": [],
+  "last_action": null,
+  "git": {
+    "initialized": false,
+    "last_commit": null,
+    "last_commit_hash": null,
+    "last_push": null,
+    "commits_since_push": 0,
+    "branch": "main",
+    "remote_url": null,
+    "dirty": false
+  }
+}

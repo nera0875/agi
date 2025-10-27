@@ -4,4 +4,4 @@ description: Load persistent memory from context.json
 allowed-tools: Task
 ---
 
-Task("writor", "MODE: LOAD - Charge mémoire .claude/context.json")
+Task(executor, "Read .claude/context.json - synthétiser top 5 patterns/decisions/état actuel")

@@ -1,0 +1,19 @@
+# Secrets
+.env
+
+# Python
+__pycache__/
+*.pyc
+venv/
+backend/__pycache__/
+
+# Node
+node_modules/
+frontend/.vite/
+
+# Logs
+*.log
+
+# IDE
+.vscode/
+.idea/

@@ -1,7 +1,6 @@
 ---
 name: writor
 description: Context memory manager - loads and writes persistent context
-tools: Read, Write, Edit
 skills: context-analyzer, context
 model: haiku
 ---

@@ -1,49 +1,63 @@
 ---
 name: git-tracker
-description: Track fichiers créés/modifiés pour state.json
+description: Smart git tracking - auto-commit milestones, push alerts, intelligent messages
 type: implementation
 ---
 
 ## Concept
 
-Tracker quels fichiers ont été créés/modifiés dans session courante pour documenter dans state.json.
+Auto-commit on phase completion, track dirty state, generate smart commit messages from diffs.
 
-## Implementation Steps
+## Automatic Triggers
 
-```bash
-# 1. Get last state timestamp
-last_time=$(jq '.last_action_timestamp' .plan/state.json)
+- Phase VALIDATION complete → Auto-commit changes
+- 5+ commits since push → Alert user
+- Session end detected → Propose push
+- Feature milestone → Commit + push
 
-# 2. Find files modified today
-find . -type f -newermt "$(date -d '24 hours ago' '+%Y-%m-%d')" > /tmp/modified.txt
-
-# 3. Filter to .plan/ and project files only
-grep -E "^\./agents/|^\./skills/|^\./\.plan/" /tmp/modified.txt
-
-# 4. Format for state.json
-cat /tmp/modified.txt | sed 's|^./||'
-```
-
-## Tracked Patterns
-
-- agents/*.md (nouvea agents)
-- skills/*/SKILL.md (nouveaux skills)
-- commands/*.md (nouveaux commands)
-- .plan/state.json (updates)
-- .plan/tasks.md (updates)
-- .plan/workflow.yaml (updates)
-- plugin.json (créé/modifié)
-
-## Return Format
+## State Tracking (`.plan/state.json` git section)
 
 ```json
 {
-  "files_modified_today": [
-    "agents/executor.md",
-    "skills/workflow-orchestration/SKILL.md",
-    ".plan/state.json"
-  ],
-  "count": 15,
-  "timestamp": "2025-10-25T10:30:00Z"
+  "git": {
+    "last_commit": "2025-10-27T12:00:00Z",
+    "commits_since_push": 3,
+    "dirty": true,
+    "branch": "main"
+  }
 }
 ```
+
+## Smart Commit Messages
+
+Analyze `git diff --stat`:
+- Backend files only → "backend: [summary]"
+- Frontend files only → "frontend: [summary]"
+- Tests added → "test: [summary]"
+- Mixed → "feat: [summary]"
+
+Format:
+```
+<type>: <summary>
+
+- Change 1
+- Change 2
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+Co-Authored-By: Claude <noreply@anthropic.com>
+```
+
+## Methods
+
+- `track_files()` - Update state.json git section
+- `should_commit()` - Check VALIDATION done + dirty files
+- `should_push()` - Check commits_since_push > 5
+- `generate_message()` - Create message from diff --stat
+- `auto_save(phase)` - Full workflow: commit + push
+
+## Rules
+
+- NEVER commit if tests fail
+- NEVER push without commit
+- ALWAYS update state.json after git operation
+- ALWAYS use conventional format

@@ -1,0 +1,102 @@
+---
+name: project-workflow-template
+version: "1.0.0"
+description: "Standard workflow template for AGI projects with all phases"
+created: "2025-10-27"
+
+phases:
+  - name: PLANNING
+    description: "Define requirements, goals, and architecture"
+    order: 1
+    gates: []
+    triggers:
+      - on_project_start: true
+    actions:
+      - type: create_artifact
+        artifact: ".plan/requirements.md"
+      - type: create_artifact
+        artifact: ".plan/architecture.md"
+      - type: create_artifact
+        artifact: ".plan/roadmap.yaml"
+    success_criteria:
+      - requirements_defined: true
+      - architecture_approved: false
+      - roadmap_complete: true
+
+  - name: IMPLEMENTATION
+    description: "Build features according to architecture"
+    order: 2
+    gates:
+      - architecture_reviewed: false
+    triggers:
+      - after_phase: PLANNING
+    actions:
+      - type: create_agents
+        scope: "as_defined_in_architecture"
+      - type: create_skills
+        scope: "as_defined_in_architecture"
+      - type: implement_features
+        according_to: "roadmap"
+    success_criteria:
+      - all_agents_created: true
+      - all_skills_created: true
+      - features_implemented: true
+      - code_quality_pass: true
+
+  - name: TESTING
+    description: "Validate functionality and quality"
+    order: 3
+    gates: []
+    triggers:
+      - after_phase: IMPLEMENTATION
+    actions:
+      - type: run_tests
+        scope: "all_agents"
+      - type: run_tests
+        scope: "all_skills"
+      - type: lint_code
+        scope: "all_files"
+      - type: validate_structure
+        against: "constraints"
+    success_criteria:
+      - tests_pass: true
+      - lint_pass: true
+      - structure_valid: true
+
+  - name: VALIDATION
+    description: "Final review and user approval"
+    order: 4
+    gates: []
+    triggers:
+      - after_phase: TESTING
+    actions:
+      - type: generate_report
+        artifact: ".plan/validation-report.md"
+      - type: user_review
+        scope: "all_deliverables"
+    success_criteria:
+      - report_complete: true
+      - user_approved: false
+
+  - name: GIT_SAVE
+    description: "Commit and push changes to GitHub"
+    order: 5
+    gates: []
+    triggers:
+      - after_phase: VALIDATION
+      - on_feature_complete: true
+      - on_session_end: true
+    actions:
+      - type: git_commit
+        message: "Auto-generated commit message based on changes"
+      - type: git_push
+        branch: main
+    success_criteria:
+      - git_status_clean: true
+      - remote_synced: true
+
+metadata:
+  kebab-case-required: true
+  no-parasite-files: true
+  auto-update: true
+  version-control: "git"

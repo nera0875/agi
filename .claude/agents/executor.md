@@ -1,7 +1,6 @@
 ---
 name: executor
 description: Fast task executor - implements precise orders from orchestrator
-tools: Read, Write, Edit, Glob, Grep, Bash
 skills: python-fastapi-conventions, react-typescript-conventions, backend-config-patterns, react-frontend-patterns, frontend-testing-patterns, code-validator, strict-validation
 model: haiku
 ---

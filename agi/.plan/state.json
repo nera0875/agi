@@ -1,0 +1,336 @@
+{
+  "project-id": "agi-v2",
+  "project-name": "AGI-V2 Multi-Agent Task Management",
+  "project-type": "external-reprise",
+  "created-at": "2025-10-27T00:00:00Z",
+  "last-updated": "2025-10-27T00:00:00Z",
+  "version": "1.0.0",
+
+  "current-phase": "maintenance",
+  "previous-phase": "audit-completed",
+
+  "progress": {
+    "percentage": 70,
+    "description": "Codebase mature, structure documented, maintenance ongoing",
+    "breakdown": {
+      "requirements": 100,
+      "architecture": 100,
+      "implementation": 95,
+      "testing": 60,
+      "deployment": 80,
+      "documentation": 70,
+      "monitoring": 50,
+      "optimization": 30
+    }
+  },
+
+  "architecture-decisions": [
+    "async-first-design",
+    "pgvector-for-embeddings",
+    "neo4j-knowledge-graph",
+    "hierarchical-memory-l1-l2-l3",
+    "langgraph-agents",
+    "fastapi-backend",
+    "react-vite-frontend",
+    "docker-compose-local-dev",
+    "jwt-stateless-auth",
+    "redis-for-l1-cache"
+  ],
+
+  "technology-stack": {
+    "backend": {
+      "framework": "FastAPI",
+      "language": "Python 3.10+",
+      "agent-framework": "LangGraph + LangChain",
+      "database-relational": "PostgreSQL 15",
+      "database-graph": "Neo4j 5.15",
+      "cache": "Redis 7",
+      "async-runtime": "asyncio"
+    },
+    "frontend": {
+      "framework": "React 18",
+      "build-tool": "Vite",
+      "language": "TypeScript",
+      "ui-library": "shadcn/ui",
+      "styling": "TailwindCSS"
+    },
+    "external-services": [
+      "Voyage AI (embeddings)",
+      "Cohere (LLM)",
+      "Anthropic Claude (LLM)"
+    ]
+  },
+
+  "agents-implemented": [
+    {
+      "name": "BaseAgent",
+      "type": "abstract-base",
+      "status": "active",
+      "location": "backend/agents/base_agent.py",
+      "purpose": "Abstract base class for all LangGraph agents",
+      "dependencies": ["langchain", "langgraph"]
+    },
+    {
+      "name": "ConsolidatorAgent",
+      "type": "functional",
+      "status": "active",
+      "location": "backend/agents/consolidator_agent.py",
+      "purpose": "Memory consolidation (L1→L2→L3)",
+      "triggers": ["ttl-expiry", "manual"]
+    },
+    {
+      "name": "ValidatorAgent",
+      "type": "functional",
+      "status": "active",
+      "location": "backend/agents/validator_agent.py",
+      "purpose": "Knowledge quality validation",
+      "triggers": ["periodic", "on-demand"]
+    },
+    {
+      "name": "PatternExtractorAgent",
+      "type": "functional",
+      "status": "active",
+      "location": "backend/agents/pattern_extractor_agent.py",
+      "purpose": "Pattern discovery in memory and graph",
+      "triggers": ["periodic", "manual"]
+    },
+    {
+      "name": "ConnectorAgent",
+      "type": "functional",
+      "status": "active",
+      "location": "backend/agents/connector_agent.py",
+      "purpose": "Knowledge graph connection building",
+      "triggers": ["on-event", "periodic"]
+    }
+  ],
+
+  "workflows-implemented": [
+    {
+      "name": "MultiAgentOrchestrator",
+      "status": "active",
+      "location": "backend/agents/workflows/multi_agent_orchestrator.py",
+      "purpose": "Central coordination hub for all agents",
+      "coordinated-agents": ["ConsolidatorAgent", "ValidatorAgent", "PatternExtractorAgent", "ConnectorAgent"]
+    },
+    {
+      "name": "MemoryConsolidationWorkflow",
+      "status": "active",
+      "location": "backend/agents/workflows/memory_consolidation_workflow.py",
+      "purpose": "L1→L2→L3 memory migration with embedding regeneration",
+      "frequency": "hourly-and-on-demand"
+    },
+    {
+      "name": "KnowledgeValidationWorkflow",
+      "status": "active",
+      "location": "backend/agents/workflows/knowledge_validation_workflow.py",
+      "purpose": "Data quality assurance across memory and graph",
+      "frequency": "daily"
+    },
+    {
+      "name": "PatternAnalysisWorkflow",
+      "status": "active",
+      "location": "backend/agents/workflows/pattern_analysis_workflow.py",
+      "purpose": "Pattern discovery and anomaly detection",
+      "frequency": "periodic"
+    }
+  ],
+
+  "services-implemented": [
+    {
+      "name": "MemoryService",
+      "status": "active",
+      "location": "backend/services/memory_service.py",
+      "capabilities": ["L1-storage", "L2-persistence", "L3-archive", "consolidation", "purge"],
+      "integration": "PostgreSQL + pgvector + Redis"
+    },
+    {
+      "name": "GraphService",
+      "status": "active",
+      "location": "backend/services/graph_service.py",
+      "capabilities": ["node-creation", "relationship-building", "cypher-queries", "pattern-analysis"],
+      "integration": "Neo4j 5.15 + APOC"
+    },
+    {
+      "name": "EmbeddingService",
+      "status": "active",
+      "location": "backend/services/embedding_service.py",
+      "capabilities": ["embed", "embed-batch", "similarity-search"],
+      "integration": "Voyage AI"
+    },
+    {
+      "name": "DatabaseService",
+      "status": "active",
+      "location": "backend/services/database.py",
+      "capabilities": ["connection-pooling", "health-checks"],
+      "integration": "asyncpg + PostgreSQL"
+    },
+    {
+      "name": "ExternalServicesManager",
+      "status": "active",
+      "location": "backend/services/external_services.py",
+      "capabilities": ["api-credential-management", "error-handling", "retries"],
+      "integrations": ["Voyage", "Cohere", "Anthropic"]
+    }
+  ],
+
+  "api-endpoints": [
+    {
+      "route": "/api/tasks",
+      "module": "backend/api/routes/tasks.py",
+      "methods": ["GET", "POST", "PUT", "DELETE"],
+      "status": "production"
+    },
+    {
+      "route": "/api/agents",
+      "module": "backend/api/routes/agents.py",
+      "methods": ["GET", "POST", "PUT", "DELETE"],
+      "status": "production"
+    },
+    {
+      "route": "/api/memory",
+      "module": "backend/api/routes/memory.py",
+      "methods": ["GET", "POST"],
+      "status": "production"
+    },
+    {
+      "route": "/api/auth",
+      "module": "backend/api/routes/auth.py",
+      "methods": ["POST"],
+      "status": "production"
+    },
+    {
+      "route": "/health",
+      "module": "backend/api/routes/health.py",
+      "methods": ["GET"],
+      "status": "production"
+    }
+  ],
+
+  "frontend-components": {
+    "total-count": 12,
+    "status": "production",
+    "location": "frontend/src/components/",
+    "framework": "React 18 + TypeScript",
+    "tested": true
+  },
+
+  "database-config": {
+    "postgresql": {
+      "host": "postgres",
+      "port": 5432,
+      "database": "agi_db",
+      "pool-min": 20,
+      "pool-max": 30,
+      "extensions": ["pgvector"]
+    },
+    "neo4j": {
+      "host": "neo4j",
+      "port": 7687,
+      "plugins": ["apoc", "gds"],
+      "pool-size": 50,
+      "memory-heap-max": "1G"
+    },
+    "redis": {
+      "host": "redis",
+      "port": 6379,
+      "max-connections": 50,
+      "maxmemory-policy": "allkeys-lru"
+    }
+  },
+
+  "testing-status": {
+    "unit-tests": {
+      "count": 0,
+      "status": "minimal",
+      "coverage": "unknown"
+    },
+    "integration-tests": {
+      "location": "backend/tests/",
+      "files": ["test_agents_api.py", "test_agents_integration.py"],
+      "status": "implemented",
+      "coverage": "partial"
+    },
+    "e2e-tests": {
+      "status": "not-implemented",
+      "recommendation": "Add frontend + backend E2E tests"
+    },
+    "overall-coverage": "~60%",
+    "recommendation": "Expand test suite in enhancement phase"
+  },
+
+  "known-issues": [],
+
+  "blockers": [
+    {
+      "id": "blocker-001",
+      "title": "CI/CD pipeline not yet implemented",
+      "severity": "medium",
+      "phase": "enhancement",
+      "assigned-to": "advisor",
+      "status": "pending-decision"
+    },
+    {
+      "id": "blocker-002",
+      "title": "Monitoring stack (Prometheus/Grafana) not configured",
+      "severity": "medium",
+      "phase": "enhancement",
+      "assigned-to": "executor",
+      "status": "pending-setup"
+    }
+  ],
+
+  "next-actions": [
+    {
+      "priority": 1,
+      "action": "Continue maintenance cycle - daily health checks",
+      "phase": "maintenance",
+      "assigned-to": "executor",
+      "deadline": "2025-11-27"
+    },
+    {
+      "priority": 2,
+      "action": "Expand test coverage to >80%",
+      "phase": "enhancement",
+      "assigned-to": "executor",
+      "deadline": "2026-01-11"
+    },
+    {
+      "priority": 3,
+      "action": "Setup CI/CD pipeline (GitHub Actions or GitLab CI)",
+      "phase": "enhancement",
+      "assigned-to": "advisor",
+      "deadline": "2025-12-27"
+    },
+    {
+      "priority": 4,
+      "action": "Performance optimization via load testing",
+      "phase": "optimization",
+      "assigned-to": "executor",
+      "deadline": "2026-01-11"
+    }
+  ],
+
+  "agents-history": [
+    {
+      "agent": "constructor",
+      "action": "Created .plan/ directory structure",
+      "timestamp": "2025-10-27T00:00:00Z",
+      "status": "completed"
+    },
+    {
+      "agent": "constructor",
+      "action": "Documentation rétroactive complète (.plan/ files created)",
+      "timestamp": "2025-10-27T12:30:00Z",
+      "status": "completed"
+    }
+  ],
+
+  "phase-transitions": [
+    {
+      "from": "audit-completed",
+      "to": "maintenance",
+      "timestamp": "2025-10-27T00:00:00Z",
+      "reason": "Initial audit complete, system ready for ongoing maintenance"
+    }
+  ]
+}

@@ -275,13 +275,12 @@ def main():
             log("No conversations found")
             return
 
-        # SKIP le plus récent (conversation actuelle)
-        if len(all_jsonl) > 1:
-            current_conversation = all_jsonl[-1]
-            files_to_process = all_jsonl[:-1]  # Tous sauf le dernier
-            log(f"Current conversation (skipped): {current_conversation.name}")
+        # SKIP les 3 plus récents (conversations actuelles + buffer)
+        if len(all_jsonl) > 3:
+            files_to_process = all_jsonl[:-3]  # Tous sauf les 3 derniers
+            log(f"Skipping latest 3 conversations: {', '.join([f.name for f in all_jsonl[-3:]])}")
         else:
-            log("Only 1 conversation found (current), nothing to process")
+            log("Only ≤3 conversations found (current/buffer), nothing to process")
             return
 
         # Process anciennes conversations SEULEMENT
@@ -297,8 +296,10 @@ def main():
             entries = process_file(jsonl_file)
 
             if entries:
-                # Merge dans context.json
-                all_entries.extend(entries)
+                # Merge dans context.json avec deduplication
+                existing_contents = {e.get('content', '') for e in all_entries}
+                new_entries = [e for e in entries if e.get('content', '') not in existing_contents]
+                all_entries.extend(new_entries)
                 processed_files.append(file_id)
                 new_files += 1
 

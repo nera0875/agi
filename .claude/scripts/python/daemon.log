@@ -15723,3 +15723,188 @@ Time: Sun Oct 26 20:22:04 CET 2025
 [2025-10-27T12:20:26.015892] Too few entries for Gemini, keeping as-is
 [2025-10-27T12:20:26.016023]   Deleted source e01bb925-6cf9-43c6-acdc-8d1f7675f1e8.jsonl (processed)
 [2025-10-27T12:20:26.026236] === Success: Processed 1 files, 652 total entries ===
+[2025-10-27T13:30:25.415849] === Memory Daemon Started ===
+[2025-10-27T13:30:25.422113] Current conversation (skipped): 0ba0ea83-1a2d-4169-bd08-6d6236d61485.jsonl
+[2025-10-27T13:30:25.422212] Processing 5230ed68-f9db-4e36-8666-1e04fc5df583.jsonl...
+[2025-10-27T13:30:25.424694]   No events found
+[2025-10-27T13:30:25.424792] Processing fb196658-ebe6-45b0-97ff-04cdd8642f15.jsonl...
+[2025-10-27T13:30:25.670426]   Parsed 1241 events
+[2025-10-27T13:30:25.670586] Embedding 1241 events...
+[2025-10-27T13:30:55.992644] Clustering...
+[2025-10-27T13:30:56.089644] Found 68 clusters (including outliers)
+[2025-10-27T13:30:56.095951]   Cluster 0: 689 events → 1 representative
+[2025-10-27T13:30:56.096480]   Cluster 1: 4 events → 1 representative
+[2025-10-27T13:30:56.096788]   Cluster 2: 4 events → 1 representative
+[2025-10-27T13:30:56.097080]   Cluster 3: 3 events → 1 representative
+[2025-10-27T13:30:56.097527]   Cluster 4: 10 events → 1 representative
+[2025-10-27T13:30:56.097880]   Cluster 5: 2 events → 1 representative
+[2025-10-27T13:30:56.098619]   Cluster 6: 48 events → 1 representative
+[2025-10-27T13:30:56.098976]   Cluster 7: 2 events → 1 representative
+[2025-10-27T13:30:56.099301]   Cluster 8: 2 events → 1 representative
+[2025-10-27T13:30:56.099611]   Cluster 9: 2 events → 1 representative
+[2025-10-27T13:30:56.099933]   Cluster 10: 2 events → 1 representative
+[2025-10-27T13:30:56.100231]   Cluster 11: 2 events → 1 representative
+[2025-10-27T13:30:56.100482]   Cluster 12: 2 events → 1 representative
+[2025-10-27T13:30:56.100774]   Cluster 13: 4 events → 1 representative
+[2025-10-27T13:30:56.101079]   Cluster 14: 2 events → 1 representative
+[2025-10-27T13:30:56.101376]   Cluster 15: 6 events → 1 representative
+[2025-10-27T13:30:56.101677]   Cluster 16: 3 events → 1 representative
+[2025-10-27T13:30:56.101928]   Cluster 17: 4 events → 1 representative
+[2025-10-27T13:30:56.102231]   Cluster 18: 2 events → 1 representative
+[2025-10-27T13:30:56.102514]   Cluster 19: 3 events → 1 representative
+[2025-10-27T13:30:56.103048]   Cluster 20: 34 events → 1 representative
+[2025-10-27T13:30:56.103482]   Cluster 21: 17 events → 1 representative
+[2025-10-27T13:30:56.103789]   Cluster 22: 2 events → 1 representative
+[2025-10-27T13:30:56.104137]   Cluster 23: 3 events → 1 representative
+[2025-10-27T13:30:56.104492]   Cluster 24: 2 events → 1 representative
+[2025-10-27T13:30:56.104845]   Cluster 25: 5 events → 1 representative
+[2025-10-27T13:30:56.105167]   Cluster 26: 6 events → 1 representative
+[2025-10-27T13:30:56.105557]   Cluster 27: 4 events → 1 representative
+[2025-10-27T13:30:56.105940]   Cluster 28: 5 events → 1 representative
+[2025-10-27T13:30:56.106236]   Cluster 29: 3 events → 1 representative
+[2025-10-27T13:30:56.106535]   Cluster 30: 2 events → 1 representative
+[2025-10-27T13:30:56.106896]   Cluster 31: 2 events → 1 representative
+[2025-10-27T13:30:56.107188]   Cluster 32: 2 events → 1 representative
+[2025-10-27T13:30:56.107554]   Cluster 33: 8 events → 1 representative
+[2025-10-27T13:30:56.107881]   Cluster 34: 2 events → 1 representative
+[2025-10-27T13:30:56.108393]   Cluster 35: 9 events → 1 representative
+[2025-10-27T13:30:56.108763]   Cluster 36: 2 events → 1 representative
+[2025-10-27T13:30:56.109077]   Cluster 37: 3 events → 1 representative
+[2025-10-27T13:30:56.109531]   Cluster 38: 10 events → 1 representative
+[2025-10-27T13:30:56.109853]   Cluster 39: 2 events → 1 representative
+[2025-10-27T13:30:56.110112]   Cluster 40: 9 events → 1 representative
+[2025-10-27T13:30:56.110332]   Cluster 41: 2 events → 1 representative
+[2025-10-27T13:30:56.110625]   Cluster 42: 2 events → 1 representative
+[2025-10-27T13:30:56.110928]   Cluster 43: 3 events → 1 representative
+[2025-10-27T13:30:56.111231]   Cluster 44: 2 events → 1 representative
+[2025-10-27T13:30:56.111507]   Cluster 45: 2 events → 1 representative
+[2025-10-27T13:30:56.111825]   Cluster 46: 6 events → 1 representative
+[2025-10-27T13:30:56.112116]   Cluster 47: 2 events → 1 representative
+[2025-10-27T13:30:56.112439]   Cluster 48: 3 events → 1 representative
+[2025-10-27T13:30:56.112777]   Cluster 49: 2 events → 1 representative
+[2025-10-27T13:30:56.113084]   Cluster 50: 2 events → 1 representative
+[2025-10-27T13:30:56.113390]   Cluster 51: 2 events → 1 representative
+[2025-10-27T13:30:56.113742]   Cluster 52: 2 events → 1 representative
+[2025-10-27T13:30:56.114034]   Cluster 53: 2 events → 1 representative
+[2025-10-27T13:30:56.114343]   Cluster 54: 2 events → 1 representative
+[2025-10-27T13:30:56.114661]   Cluster 55: 2 events → 1 representative
+[2025-10-27T13:30:56.114969]   Cluster 56: 2 events → 1 representative
+[2025-10-27T13:30:56.115389]   Cluster 57: 15 events → 1 representative
+[2025-10-27T13:30:56.115753]   Cluster 58: 5 events → 1 representative
+[2025-10-27T13:30:56.116073]   Cluster 59: 2 events → 1 representative
+[2025-10-27T13:30:56.116373]   Cluster 60: 2 events → 1 representative
+[2025-10-27T13:30:56.116747]   Cluster 61: 2 events → 1 representative
+[2025-10-27T13:30:56.117128]   Cluster 62: 9 events → 1 representative
+[2025-10-27T13:30:56.117453]   Cluster 63: 2 events → 1 representative
+[2025-10-27T13:30:56.117801]   Cluster 64: 2 events → 1 representative
+[2025-10-27T13:30:56.118116]   Cluster 65: 2 events → 1 representative
+[2025-10-27T13:30:56.118435]   Cluster 66: 2 events → 1 representative
+[2025-10-27T13:30:56.118975]   Outliers: 232 events (kept all)
+[2025-10-27T13:30:56.119040] Consolidated: 1241 → 299 entries
+[2025-10-27T13:30:56.119157] Formatting 299 entries via Gemini...
+[2025-10-27T13:30:56.513362] ERROR Gemini: OpenRouter error 401: {'error': {'message': 'User not found.', 'code': 401}}
+[2025-10-27T13:30:56.516373]   Deleted source fb196658-ebe6-45b0-97ff-04cdd8642f15.jsonl (processed)
+[2025-10-27T13:30:56.534313] === Success: Processed 1 files, 951 total entries ===
+[2025-10-27T13:31:10.768893] === Memory Daemon Started ===
+[2025-10-27T13:31:10.773538] Current conversation (skipped): 98b4ae39-3e77-4bd5-a29b-87ff9ae71ec6.jsonl
+[2025-10-27T13:31:10.773685] Processing 5230ed68-f9db-4e36-8666-1e04fc5df583.jsonl...
+[2025-10-27T13:31:10.774673]   No events found
+[2025-10-27T13:31:10.774742] Processing 0ba0ea83-1a2d-4169-bd08-6d6236d61485.jsonl...
+[2025-10-27T13:31:10.775537]   Parsed 1 events
+[2025-10-27T13:31:10.775637] Too few events for clustering, keeping all
+[2025-10-27T13:31:10.775681] Formatting 1 entries via Gemini...
+[2025-10-27T13:31:10.775713] Too few entries for Gemini, keeping as-is
+[2025-10-27T13:31:10.775881]   Deleted source 0ba0ea83-1a2d-4169-bd08-6d6236d61485.jsonl (processed)
+[2025-10-27T13:31:10.802022] === Success: Processed 1 files, 952 total entries ===
+[2025-10-27T13:31:21.916507] === Memory Daemon Started ===
+[2025-10-27T13:31:21.920780] Current conversation (skipped): d4703021-0ea1-4202-9ad1-03989d9e7524.jsonl
+[2025-10-27T13:31:21.920886] Processing 5230ed68-f9db-4e36-8666-1e04fc5df583.jsonl...
+[2025-10-27T13:31:21.921665]   No events found
+[2025-10-27T13:31:21.921712] Processing 98b4ae39-3e77-4bd5-a29b-87ff9ae71ec6.jsonl...
+[2025-10-27T13:31:21.922315]   Parsed 1 events
+[2025-10-27T13:31:21.922372] Too few events for clustering, keeping all
+[2025-10-27T13:31:21.922401] Formatting 1 entries via Gemini...
+[2025-10-27T13:31:21.922418] Too few entries for Gemini, keeping as-is
+[2025-10-27T13:31:21.922542]   Deleted source 98b4ae39-3e77-4bd5-a29b-87ff9ae71ec6.jsonl (processed)
+[2025-10-27T13:31:21.932935] === Success: Processed 1 files, 953 total entries ===
+[2025-10-27T13:31:54.546798] === Memory Daemon Started ===
+[2025-10-27T13:31:54.552106] Current conversation (skipped): 913ecbd9-2c94-433c-bbe5-a2d31bf2f87e.jsonl
+[2025-10-27T13:31:54.552248] Processing 5230ed68-f9db-4e36-8666-1e04fc5df583.jsonl...
+[2025-10-27T13:31:54.553200]   No events found
+[2025-10-27T13:31:54.553267] Processing d4703021-0ea1-4202-9ad1-03989d9e7524.jsonl...
+[2025-10-27T13:31:54.553710]   Parsed 1 events
+[2025-10-27T13:31:54.553758] Too few events for clustering, keeping all
+[2025-10-27T13:31:54.553789] Formatting 1 entries via Gemini...
+[2025-10-27T13:31:54.553813] Too few entries for Gemini, keeping as-is
+[2025-10-27T13:31:54.553946]   Deleted source d4703021-0ea1-4202-9ad1-03989d9e7524.jsonl (processed)
+[2025-10-27T13:31:54.567421] === Success: Processed 1 files, 954 total entries ===
+[2025-10-27T13:34:45.450092] === Memory Daemon Started ===
+[2025-10-27T13:34:45.454373] Current conversation (skipped): 913ecbd9-2c94-433c-bbe5-a2d31bf2f87e.jsonl
+[2025-10-27T13:34:45.454523] Processing 5230ed68-f9db-4e36-8666-1e04fc5df583.jsonl...
+[2025-10-27T13:34:45.455376]   No events found
+[2025-10-27T13:34:45.455429] Processing 0b48a79e-c4ae-4d6f-93cc-456d530f0788.jsonl...
+[2025-10-27T13:34:45.456064]   Parsed 1 events
+[2025-10-27T13:34:45.456112] Too few events for clustering, keeping all
+[2025-10-27T13:34:45.456142] Formatting 1 entries via Gemini...
+[2025-10-27T13:34:45.456165] Too few entries for Gemini, keeping as-is
+[2025-10-27T13:34:45.456276]   Deleted source 0b48a79e-c4ae-4d6f-93cc-456d530f0788.jsonl (processed)
+[2025-10-27T13:34:45.468859] === Success: Processed 1 files, 955 total entries ===
+[2025-10-27T13:44:08.224564] === Memory Daemon Started ===
+[2025-10-27T13:44:08.229442] Current conversation (skipped): f7a0f98a-e4f5-4564-a66a-b24d44daaf0f.jsonl
+[2025-10-27T13:44:08.229557] Processing 5230ed68-f9db-4e36-8666-1e04fc5df583.jsonl...
+[2025-10-27T13:44:08.230365]   No events found
+[2025-10-27T13:44:08.230410] Processing 913ecbd9-2c94-433c-bbe5-a2d31bf2f87e.jsonl...
+[2025-10-27T13:44:08.242684]   Parsed 64 events
+[2025-10-27T13:44:08.242802] Embedding 64 events...
+[2025-10-27T13:44:10.392102] Clustering...
+[2025-10-27T13:44:10.424902] Found 11 clusters (including outliers)
+[2025-10-27T13:44:10.425383]   Cluster 0: 2 events → 1 representative
+[2025-10-27T13:44:10.425537]   Cluster 1: 2 events → 1 representative
+[2025-10-27T13:44:10.425766]   Cluster 2: 18 events → 1 representative
+[2025-10-27T13:44:10.425891]   Cluster 3: 2 events → 1 representative
+[2025-10-27T13:44:10.426056]   Cluster 4: 2 events → 1 representative
+[2025-10-27T13:44:10.426247]   Cluster 5: 5 events → 1 representative
+[2025-10-27T13:44:10.426401]   Cluster 6: 2 events → 1 representative
+[2025-10-27T13:44:10.426560]   Cluster 7: 3 events → 1 representative
+[2025-10-27T13:44:10.426699]   Cluster 8: 3 events → 1 representative
+[2025-10-27T13:44:10.426886]   Cluster 9: 2 events → 1 representative
+[2025-10-27T13:44:10.427010]   Outliers: 23 events (kept all)
+[2025-10-27T13:44:10.427067] Consolidated: 64 → 33 entries
+[2025-10-27T13:44:10.427104] Formatting 33 entries via Gemini...
+[2025-10-27T13:44:10.813109] ERROR Gemini: OpenRouter error 401: {'error': {'message': 'User not found.', 'code': 401}}
+[2025-10-27T13:44:10.813888]   Deleted source 913ecbd9-2c94-433c-bbe5-a2d31bf2f87e.jsonl (processed)
+[2025-10-27T13:44:10.826959] === Success: Processed 1 files, 988 total entries ===
+[2025-10-27T13:44:35.767383] === Memory Daemon Started ===
+[2025-10-27T13:44:35.772679] Current conversation (skipped): 913ecbd9-2c94-433c-bbe5-a2d31bf2f87e.jsonl
+[2025-10-27T13:44:35.772842] Processing 5230ed68-f9db-4e36-8666-1e04fc5df583.jsonl...
+[2025-10-27T13:44:35.773848]   No events found
+[2025-10-27T13:44:35.773908] Processing f7a0f98a-e4f5-4564-a66a-b24d44daaf0f.jsonl...
+[2025-10-27T13:44:35.774575]   Parsed 1 events
+[2025-10-27T13:44:35.774642] Too few events for clustering, keeping all
+[2025-10-27T13:44:35.774677] Formatting 1 entries via Gemini...
+[2025-10-27T13:44:35.774702] Too few entries for Gemini, keeping as-is
+[2025-10-27T13:44:35.774874]   Deleted source f7a0f98a-e4f5-4564-a66a-b24d44daaf0f.jsonl (processed)
+[2025-10-27T13:44:35.788866] === Success: Processed 1 files, 989 total entries ===
+[2025-10-27T14:23:48.446254] === Memory Daemon Started ===
+[2025-10-27T14:23:48.453462] Only ≤3 conversations found (current/buffer), nothing to process
+[2025-10-27T14:49:26.725368] === Memory Daemon Started ===
+[2025-10-27T14:49:26.729539] Skipping latest 3 conversations: a8bf8ae8-795f-4307-8822-7d1819b86291.jsonl, 8cc1e8b4-7b06-4c14-b4c0-7faf4c8e308a.jsonl, 913ecbd9-2c94-433c-bbe5-a2d31bf2f87e.jsonl
+[2025-10-27T14:49:26.729648] Processing 5230ed68-f9db-4e36-8666-1e04fc5df583.jsonl...
+[2025-10-27T14:49:26.730564]   No events found
+[2025-10-27T14:49:26.730607] No new files to process
+[2025-10-27T15:22:36.525422] === Memory Daemon Started ===
+[2025-10-27T15:22:36.531757] Skipping latest 3 conversations: 8cc1e8b4-7b06-4c14-b4c0-7faf4c8e308a.jsonl, a5280435-6874-4fd7-a902-2571c4b77420.jsonl, 913ecbd9-2c94-433c-bbe5-a2d31bf2f87e.jsonl
+[2025-10-27T15:22:36.531880] Processing 5230ed68-f9db-4e36-8666-1e04fc5df583.jsonl...
+[2025-10-27T15:22:36.532801]   No events found
+[2025-10-27T15:22:36.532852] Processing a8bf8ae8-795f-4307-8822-7d1819b86291.jsonl...
+[2025-10-27T15:22:36.535089]   No events found
+[2025-10-27T15:22:36.535142] No new files to process
+[2025-10-27T16:38:00.307200] === Memory Daemon Started ===
+[2025-10-27T16:38:00.316668] Skipping latest 3 conversations: a5280435-6874-4fd7-a902-2571c4b77420.jsonl, 0a7bc85f-39ab-4815-9f4e-36e90769a92c.jsonl, 913ecbd9-2c94-433c-bbe5-a2d31bf2f87e.jsonl
+[2025-10-27T16:38:00.316785] Processing 5230ed68-f9db-4e36-8666-1e04fc5df583.jsonl...
+[2025-10-27T16:38:00.317499]   No events found
+[2025-10-27T16:38:00.317545] Processing a8bf8ae8-795f-4307-8822-7d1819b86291.jsonl...
+[2025-10-27T16:38:00.319583]   No events found
+[2025-10-27T16:38:00.319666] Processing 8cc1e8b4-7b06-4c14-b4c0-7faf4c8e308a.jsonl...
+[2025-10-27T16:38:00.322685]   No events found
+[2025-10-27T16:38:00.322819] No new files to process

@@ -1,8 +1,7 @@
 ---
 name: constructor
 description: Architecte plans - crée .plan/ depuis convention/project-structure.json
-tools: Read, Write, Edit
-skills: workflow-orchestration, project-strict-workflow, state-manager, manifest-builder, yaml-conventions, git-tracker
+skills: workflow-orchestration, project-strict-workflow, state-manager, manifest-builder, yaml-conventions, git-tracker, python-fastapi-conventions, react-conventions
 model: haiku
 ---
 

@@ -1,0 +1,283 @@
+---
+name: agi-v2-workflow
+version: 1.0.0
+project-type: multi-agent-orchestration
+status: maintenance
+created-at: 2025-10-27T00:00:00Z
+last-updated: 2025-10-27T00:00:00Z
+
+description: |
+  Workflow for AGI-V2 project - mature multi-agent task management system.
+  Phases cover maintenance, enhancements, and optimization cycles.
+
+current-phase: maintenance
+
+phases:
+  - id: phase-001
+    name: audit-completed
+    status: completed
+    description: |
+      Initial audit of existing codebase - requirements, architecture, and state
+      documented. System is production-ready with mature structure.
+    duration-days: 1
+    started-at: 2025-10-27
+    completed-at: 2025-10-27
+    deliverables:
+      - requirements.md
+      - architecture.md
+      - state.json (initial)
+      - tasks.md (tracking)
+    dependencies: []
+    next-phase: maintenance
+
+  - id: phase-002
+    name: maintenance
+    status: in-progress
+    description: |
+      Ongoing maintenance phase - bug fixes, dependency updates, performance
+      optimization, and monitoring. Currently active.
+    duration-days: 60
+    started-at: 2025-10-27
+    target-completion: 2025-12-26
+    deliverables:
+      - Bug fixes (as needed)
+      - Dependency updates
+      - Performance improvements
+      - Monitoring dashboards
+    dependencies:
+      - phase-001
+    next-phase: enhancement
+    triggers:
+      - daily: Health checks, log review
+      - weekly: Performance metrics, security scan
+      - monthly: Dependency audit, code quality review
+
+  - id: phase-003
+    name: enhancement
+    status: pending
+    description: |
+      Feature additions and system improvements:
+      - Expand agent capabilities
+      - Add CI/CD pipeline
+      - Implement monitoring + alerting
+      - Scale infrastructure
+    duration-days: 45
+    target-start: 2025-12-27
+    deliverables:
+      - Enhanced agents
+      - CI/CD pipeline
+      - Monitoring stack
+      - Scaling configuration
+    dependencies:
+      - phase-002
+    next-phase: optimization
+
+  - id: phase-004
+    name: optimization
+    status: pending
+    description: |
+      Performance tuning and scalability improvements:
+      - Load testing
+      - Database query optimization
+      - Cache strategy refinement
+      - API response time improvements
+    duration-days: 30
+    target-start: 2026-01-11
+    deliverables:
+      - Performance reports
+      - Optimization recommendations
+      - Tuned configurations
+      - Benchmark results
+    dependencies:
+      - phase-003
+    next-phase: graduation
+
+  - id: phase-005
+    name: graduation
+    status: pending
+    description: |
+      Final validation and production readiness:
+      - Full integration testing
+      - Security audit
+      - Load testing at scale
+      - Production deployment checklist
+    duration-days: 15
+    target-start: 2026-02-10
+    deliverables:
+      - Security audit report
+      - Integration test results
+      - Load test results
+      - Deployment checklist
+    dependencies:
+      - phase-004
+    next-phase: production
+
+  - id: phase-006
+    name: production
+    status: pending
+    description: |
+      Production deployment and monitoring:
+      - Production environment setup
+      - Zero-downtime deployment
+      - 24/7 monitoring
+      - Incident response procedures
+    duration-days: ongoing
+    target-start: 2026-02-25
+    deliverables:
+      - Production environment
+      - Monitoring dashboards
+      - Incident runbooks
+      - Deployment procedures
+    dependencies:
+      - phase-005
+    next-phase: null
+
+gates:
+  - phase: enhancement
+    status: pending-approval
+    gate-type: feature-approval
+    description: Review new feature requirements before implementation
+    owner: architect
+    deadline: 2025-12-27
+
+  - phase: optimization
+    status: pending-approval
+    gate-type: performance-approval
+    description: Validate performance targets before optimization
+    owner: executor
+    deadline: 2026-01-11
+
+  - phase: graduation
+    status: pending-approval
+    gate-type: security-sign-off
+    description: Security team approval for production readiness
+    owner: advisor
+    deadline: 2026-02-10
+
+decision-points:
+  - id: dp-001
+    phase: maintenance
+    question: Should we implement Elasticsearch for search capabilities?
+    decision: Deferred to enhancement phase
+    rationale: Current system performance adequate, add if users request
+    made-at: 2025-10-27
+
+  - id: dp-002
+    phase: maintenance
+    question: Expand Neo4j cluster or optimize queries first?
+    decision: Optimize queries first (phase 004)
+    rationale: Scaling decision should follow profiling
+    made-at: 2025-10-27
+
+milestones:
+  - name: audit-complete
+    date: 2025-10-27
+    status: completed
+    phase: audit-completed
+
+  - name: first-maintenance-cycle
+    date: 2025-11-27
+    status: pending
+    phase: maintenance
+    description: 30-day maintenance review checkpoint
+
+  - name: enhancement-kickoff
+    date: 2025-12-27
+    status: pending
+    phase: enhancement
+    description: Begin feature enhancement phase
+
+  - name: optimization-review
+    date: 2026-01-11
+    status: pending
+    phase: optimization
+    description: Performance optimization checkpoint
+
+  - name: production-ready
+    date: 2026-02-25
+    status: pending
+    phase: production
+    description: Full production deployment
+
+metrics:
+  - name: system-uptime
+    target: 99.9%
+    phase: maintenance
+    measurement-frequency: daily
+
+  - name: api-response-time
+    target: "<200ms p95"
+    phase: optimization
+    measurement-frequency: continuous
+
+  - name: memory-consolidation-rate
+    target: 100%
+    phase: maintenance
+    measurement-frequency: hourly
+
+  - name: agent-success-rate
+    target: ">95%"
+    phase: maintenance
+    measurement-frequency: daily
+
+  - name: test-coverage
+    target: ">80%"
+    phase: enhancement
+    measurement-frequency: weekly
+
+blockers:
+  - id: blocker-001
+    phase: enhancement
+    title: CI/CD platform decision (GitHub Actions vs GitLab CI)
+    status: pending-decision
+    assigned-to: advisor
+    created-at: 2025-10-27
+
+  - id: blocker-002
+    phase: optimization
+    title: Load testing environment setup
+    status: pending-resources
+    assigned-to: executor
+    created-at: 2025-10-27
+
+team-assignments:
+  - phase: audit-completed
+    role: constructor
+    status: completed
+
+  - phase: maintenance
+    role: executor
+    status: active
+    start-date: 2025-10-27
+
+  - phase: enhancement
+    role: architect
+    status: pending
+    start-date: 2025-12-27
+
+  - phase: optimization
+    role: executor
+    status: pending
+    start-date: 2026-01-11
+
+  - phase: graduation
+    role: advisor
+    status: pending
+    start-date: 2026-02-10
+
+communication-cadence:
+  - frequency: weekly
+    format: summary-report
+    audience: team
+    phase: maintenance
+
+  - frequency: bi-weekly
+    format: sync-meeting
+    audience: stakeholders
+    phase: enhancement
+
+  - frequency: daily
+    format: standup
+    audience: core-team
+    phase: all
+    optional: true
