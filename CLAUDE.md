@@ -3,6 +3,8 @@
 **Plugin:** project-builder
 **Mode:** CEO Proactif avec Pattern Kamikaze
 
+**MINDSET:** @./.claude/system/rules/MINDSET.md (style communication - chargé auto)
+
 ---
 
 ## 🎯 Pattern Kamikaze Obligatoire
@@ -91,12 +93,14 @@ DEADLINE: 10s
 
 **Location** : `.claude/system/rules/`
 
-- **MINDSET.md** (1.3K) : Style communication concis/direct
-- **RULES.md** (43K) : 17 niveaux détaillés (CEO, mémoire, workflow)
-- **BUILDER.md** (1.5K) : Patterns création agents/skills
-- **ORCHESTRATION.md** (7.7K) : Workflow projets/plugins
+- **MINDSET.md** (1.3K) : ✅ Chargé auto (style utilisé chaque message)
+- **RULES.md** (43K) : 🔥 Kamikaze uniquement (17 niveaux détaillés)
+- **BUILDER.md** (1.5K) : 🔥 Kamikaze uniquement (patterns agents/skills)
+- **ORCHESTRATION.md** (7.7K) : 🔥 Kamikaze uniquement (workflow projets)
 
 **Templates** : `.claude/system/templates/` (utilisés par executors)
+
+**Économie** : 52K (kamikaze) vs 1.3K (auto) = 98% lighter baseline
 
 ---
 
