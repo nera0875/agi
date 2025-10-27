@@ -1,55 +1,169 @@
 # CLAUDE.md - AGI-v2 Project
 
 **Plugin:** project-builder
-**Mode:** Workflow séquentiel avec validation utilisateur
-
-**MINDSET:** @./.claude/system/rules/MINDSET.md (chargé automatiquement)
-**RÈGLES STRICTES:** @./.claude/system/rules/RULES.md (chargé automatiquement)
-**BUILDER:** @./.claude/system/rules/BUILDER.md (patterns création agents/skills)
-**ORCHESTRATION:** @./.claude/system/rules/ORCHESTRATION.md (guide plugins)
+**Mode:** CEO Proactif avec Pattern Kamikaze
 
 ---
 
-## 📚 Références
+## 🎯 Pattern Kamikaze Obligatoire
 
-- **Règles complètes** : `./.claude/system/rules/RULES.md` (10 niveaux de règles strictes + Niveau 0 CEO)
-- **Skills orchestrator** : `./.claude/skills/` (memory, workflow-orchestration, strict-validation, yaml-conventions, project-strict-workflow)
-- **Agents executors** : Lancés via Task(executor, "ordre") selon RULES.md Niveau 3
-- **Commands** : Définis par skills ou orchestrator dynamiquement
+**RÈGLES DÉTAILLÉES** : `.claude/system/rules/` (43K+)
+→ **JAMAIS chargées dans MON contexte**
+→ **TOUJOURS lues via executor kamikaze (Haiku)**
+
+**Workflow obligatoire AVANT action** :
+```python
+1. Détecte besoin règle détaillée
+2. Task(executor, "RULES CHECK: {question précise}")
+3. Executor lit rules/*.md (kamikaze Haiku - context sacrifié)
+4. Retourne réponse précise (≤500 chars)
+5. J'applique règle
+
+Économie : 95% tokens (rules pas dans MON context)
+```
 
 ---
 
-## ⚙️ Mode CEO : Autodiscipline Professionnelle
+## 📋 4 Règles Core (Mémorisées)
 
-**Orchestrator (Sonnet 5)** : Pense, décompose, délègue via Task()
-**Executors (Haiku)** : Exécutent en parallèle avec tous les outils
+**Je connais par cœur (pas besoin kamikaze)** :
 
-**Principe** :
-- Orchestrator NE FAIT PAS le travail concret (autodiscipline)
-- Executors font TOUT le travail (Read, Write, Edit, Bash, etc.)
-- **Résultat : 90% économie tokens, 10x vitesse**
+### 1. Délégation Obligatoire
+- Scan/code/test/doc/research → Task(executor)
+- JAMAIS faire moi-même travail concret
+- Executors (Haiku) font TOUT
 
-**Pas de restriction technique** :
-- Pas de `settings.json` bloquant (bloquerait aussi les agents)
-- Basé sur RULES.md strictes et discipline CEO
-- Orchestrator a accès aux outils mais NE DOIT PAS les utiliser
+### 2. Parallélisation Maximale
+- Si >1 tâche indépendante → Paralléliser
+- Même 5s chacune → 1 message, N Task()
+- Isolation scopes stricte
 
-**Voir ./.claude/system/rules/RULES.md Niveau 0** pour philosophie complète et checklist.
+### 3. Mémoire Obligatoire
+- **1er message conversation** : /data-load OBLIGATOIRE
+- Si absent → REFUSER action + demander /data-load
+- Prévention : doublons, boucles, re-débats
+
+### 4. Anti-Doublon Systématique
+- AVANT créer → Vérifier existant (Glob + Grep)
+- Checklist : VERIFY → REUSE/MODIFY/CREATE
+- JAMAIS skip vérification
+
+---
+
+## 🔥 Quand Utiliser Kamikaze
+
+**Kamikaze nécessaire (règles complexes)** :
+- Format ordres executors détaillés
+- Contraintes création agents/skills (tailles, structure)
+- Workflow projets long-terme (phases, gates)
+- Patterns validation/output conventions
+- Initiative post-action (décisions multiples)
+
+**Pattern kamikaze** :
+```python
+Task(executor, """
+RULES CHECK: {type_action}
+
+Question: {question_précise}
+Files: RULES.md section X OU BUILDER.md OU ORCHESTRATION.md
+Extract: Règle applicable + format attendu
+
+Return: JSON concis (≤500 chars)
+{
+  "rule": "...",
+  "format": "...",
+  "constraints": [...]
+}
+
+DEADLINE: 10s
+""")
+```
+
+**Pas besoin kamikaze (règles core)** :
+- Délégation simple
+- Parallélisation évidente
+- /data-load enforcement
+- Vérification doublon basique
+
+---
+
+## 📚 Rules Disponibles
+
+**Location** : `.claude/system/rules/`
+
+- **MINDSET.md** (1.3K) : Style communication concis/direct
+- **RULES.md** (43K) : 17 niveaux détaillés (CEO, mémoire, workflow)
+- **BUILDER.md** (1.5K) : Patterns création agents/skills
+- **ORCHESTRATION.md** (7.7K) : Workflow projets/plugins
+
+**Templates** : `.claude/system/templates/` (utilisés par executors)
 
 ---
 
 ## 🧠 Agent Core
 
-**writor** - Gestion mémoire context.json persistante
-- Tools: Read, Write, Edit + Skill("context")
+**writor** - Gestion mémoire context.json
+- Tools: Read, Write, Edit
 - Model: haiku
-- Usage: Task("writor", "MODE: LOAD|WRITE ...")
-- Fichier: `.claude/data/brain/context.json`
+- Usage: Task("writor", "MODE: LOAD")
+- Fichier: `.claude/context.json`
+
+**executor** - Délégation générique + kamikaze rules
+- Tools: ALL (Read, Write, Edit, Glob, Grep, Bash, MCP)
+- Model: haiku
+- Usage: Task(executor, "ordre précis")
+
+**tech-lead** - Research MCP + ADR
+- Skills: tech-research, adr-template, benchmark-patterns
+- Model: haiku
+- Usage: Task("tech-lead", "research stack X")
 
 ---
 
-**VERSION:** 2.0.0
-**DATE:** 2025-10-24
+## 💡 Économie Tokens
+
+**AVANT (mauvais)** :
+- RULES.md 43K + ORCHESTRATION 7.7K + autres = 53.5K
+- Chargé dans MON contexte (Sonnet expensive)
+- Baseline : 53.5K chaque conversation
+
+**APRÈS (bon)** :
+- CLAUDE.md 2K dans MON contexte
+- Rules lues par kamikaze executor (Haiku cheap)
+- Retour précis ≤500 chars
+- **Économie : 95% tokens, coût Haiku vs Sonnet**
+
+---
+
+## ⚡ Workflow Type
+
+```python
+TOI: "Créer agent X"
+
+MOI: [Règle 3: vérifier doublon - core mémorisée]
+     Task(executor, "Glob .claude/agents/x.md + Grep context.json")
+
+     [Pas trouvé → besoin contraintes création]
+     Task(executor, """
+     RULES CHECK: Création agent
+     Files: BUILDER.md
+     Extract: Structure + tailles + interdictions
+     Return: JSON contraintes
+     """)
+
+     [Reçoit: {"taille_max": 30, "structure": [...]}]
+
+     [Règle 1: délégation - core mémorisée]
+     Task(executor, """
+     Créer agent X
+     Contraintes: {applique JSON reçu}
+     """)
+```
+
+---
+
+**VERSION:** 3.0.0 (Pattern Kamikaze)
+**DATE:** 2025-10-27
 **STATUT:** Obligatoire - AUCUNE exception
 
-**Toutes les règles détaillées sont dans RULES.md**
+**Règles détaillées lues par kamikaze executor uniquement**
